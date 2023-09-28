@@ -111,6 +111,29 @@
                 return;
             }
 
+            if(document.getElementById('message').value === '$clear') {
+                let pwd = window.prompt('Enter password to clear messages: ');
+
+                fetch('/api', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        type: 'clearMessages',
+                        pwd: pwd,
+                    }),
+                }).then(res => {
+                    return res.json();
+                }).then(data => {
+                    if(data.success) {
+                        init();
+                    } else {
+                        alert(data.error);
+                    }
+                })
+            }
+
             fetch('/api', {
                 method: 'POST',
                 headers: {
@@ -122,8 +145,8 @@
                         username: document.getElementById('username').value,
                         timestamp: new Date().toLocaleString(),
                         content: document.getElementById('message').value,
-                    }
-                })
+                    },
+                }),
             });
 
             document.getElementById('message').value = '';

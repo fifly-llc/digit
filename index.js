@@ -40,6 +40,18 @@ app.post('/api', (req, res) => {
     } else if (body.type === 'postMessage') {
         messageArray.push(body.message);
         res.sendStatus(200);
+    } else if (body.type === 'clearMessages') {
+        if (!body.pwd === 'clear') {
+            res.send({
+                success: false,
+                error: 'Invalid password'
+            });
+        }
+
+        messageArray = [];
+        res.send({
+            success: true
+        });
     }
 });
 
