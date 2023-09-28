@@ -107,7 +107,7 @@
                     type: 'postMessage',
                     message: {
                         username: document.getElementById('username').value,
-                        timestamp: new Date().toLocaleString() + '(UTC+' + new Date().getTimezoneOffset() + ')',
+                        timestamp: new Date().toLocaleString(),
                         content: document.getElementById('message').value,
                     }
                 })
