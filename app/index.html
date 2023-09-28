@@ -68,7 +68,7 @@
             // Display messages after fetching is complete
             messageArray.forEach(message => {
                 let msg = message.content;
-                messages.innerHTML += '<div class="message"><b>' + message.username + '</b>: ' + msg + '</div>';
+                messages.innerHTML += '<div class="message"><i>' + message.timestamp + '</i><b>' + message.username + '</b>: ' + msg + '</div>';
             });
         });
     }
@@ -86,6 +86,7 @@
                     type: 'postMessage',
                     message: {
                         username: document.getElementById('username').value,
+                        timestamp: new Date().toLocaleString(),
                         content: document.getElementById('message').value,
                     }
                 })
