@@ -46,11 +46,7 @@
 </body>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const messages = document.querySelector('.messages');
-
-        let messageArray = [];
-
+    function init() {
         fetch('/api', {
             method: 'POST',
             headers: {
@@ -70,6 +66,14 @@
             let msg = message.content;
             messages.innerHTML = '<div class="message">' + msg + '</div' + messages.innerHTML;
         });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const messages = document.querySelector('.messages');
+
+        let messageArray = [];
+
+        init();
 
         document.getElementById('send').addEventListener('click', () => {
             fetch('/api', {
@@ -84,6 +88,8 @@
                     }
                 })
             });
+
+            init();
         });
     });
 </script>

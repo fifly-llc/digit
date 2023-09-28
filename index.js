@@ -38,7 +38,7 @@ app.post('/api', (req, res) => {
     if(body.type === 'getMessages') {
         res.send({ messages: messageArray });
     } else if (body.type === 'postMessage') {
-        console.log(body.message);
+        console.log("Message with content " + body.message.content + " has been posted");
         messageArray.push(body.message);
         res.sendStatus(200);
     }
