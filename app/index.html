@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,6 +38,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="send">
         <input type="text" name="message" id="message">
@@ -48,13 +50,11 @@
 <script>
     let messageArray = [];
     const messages = document.querySelector('.messages');
-
     function init() {
         fetch('/api', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-
             },
             body: JSON.stringify({
                 type: 'getMessages',
@@ -63,11 +63,12 @@
             return res.json();
         }).then(data => {
             messageArray = data.messages;
-        });
 
-        messageArray.forEach(message => {
-            let msg = message.content;
-            messages.innerHTML = '<div class="message">' + msg + '</div' + messages.innerHTML;
+            // Display messages after fetching is complete
+            messageArray.forEach(message => {
+                let msg = message.content;
+                messages.innerHTML += '<div class="message">' + msg + '</div>';
+            });
         });
     }
 
@@ -92,4 +93,5 @@
         });
     });
 </script>
+
 </html>
