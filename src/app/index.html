@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinesis App</title>
+    <style>
+        .send {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .send input {
+            width: 300px;
+            height: 30px;
+            border: 1px solid black;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        .send button {
+            height: 30px;
+            border: 1px solid black;
+            border-radius: 5px;
+            padding: 5px;
+            margin-left: 10px;
+        }
+
+        .message {
+            padding: 10px;
+            border: 1px solid black;
+            border-radius: 5px;
+            margin: 10px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="send">
+        <input type="text" name="message" id="message">
+        <button id="send">Send</button>
+    </div>
+    <div class="messages"></div>
+</body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const messages = document.querySelector('.messages');
+
+        let messageArray = [];
+
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+
+            },
+            body: JSON.stringify({
+                type: 'getMessages',
+            })
+        }).then(res => {
+            return res.json();
+        }).then(data => {
+            messageArray = data.messages;
+        });
+
+        messageArray.forEach(message => {
+            let msg = message.content;
+            messages.innerHTML = '<div class="message">' + msg + '</div' + messages.innerHTML;
+        });
+
+        document.getElementById('send').addEventListener('click', () => {
+            fetch('/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'postMessage',
+                    message: {
+                        content: document.getElementById('message').value
+                    }
+                })
+            });
+        });
+    });
+</script>
+</html>
