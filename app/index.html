@@ -36,14 +36,29 @@
             margin: 10px;
             width: 300px;
         }
+
+        .message i {
+            font-style: italic;
+            font-size: 12px;
+            color: gray;
+            margin-right: 10px;
+        }
+
+        label {
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 12px;
+            color: gray;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 
 <body>
     <div class="send">
-        <label for="username">Username:</label>
+        <label for="username">Username: </label>
         <input type="text" name="username" id="username">
-        <label for="message">Message:</label>
+        <label for="message">Message: </label>
         <input type="text" name="message" id="message">
         <button id="send">Send</button>
     </div>
@@ -88,7 +103,7 @@
                     type: 'postMessage',
                     message: {
                         username: document.getElementById('username').value,
-                        timestamp: new Date().toLocaleString(),
+                        timestamp: new Date().toLocaleString() + '(UTC+' + new Date().getTimezoneOffset() + ')',
                         content: document.getElementById('message').value,
                     }
                 })
