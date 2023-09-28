@@ -105,6 +105,10 @@
         init();
 
         document.getElementById('send').addEventListener('click', () => {
+            if(!document.getElementById('username').value || !document.getElementById('message').value) {
+                return;
+            }
+            
             fetch('/api', {
                 method: 'POST',
                 headers: {
