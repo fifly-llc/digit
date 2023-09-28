@@ -11,11 +11,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
-    res.send(fs.readFileSync('./src/index.html'));
+    res.send(fs.readFileSync('./index.html'));
 });
 
 app.get('/app', (req, res) => {
-    res.send(fs.readFileSync('./src/app/index.html'));
+    res.send(fs.readFileSync('./app/index.html'));
 });
 
 app.post('/api', (req, res) => {
