@@ -93,6 +93,8 @@
         }).then(data => {
             messageArray = data.messages;
 
+            messages.innerHTML = '';
+
             // Display messages after fetching is complete
             messageArray.forEach(message => {
                 let msg = message.content;
