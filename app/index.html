@@ -108,7 +108,7 @@
             if(!document.getElementById('username').value || !document.getElementById('message').value) {
                 return;
             }
-            
+
             fetch('/api', {
                 method: 'POST',
                 headers: {
@@ -123,6 +123,8 @@
                     }
                 })
             });
+
+            document.getElementById('message').value = '';
 
             init();
         });
