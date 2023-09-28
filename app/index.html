@@ -107,9 +107,14 @@
         init();
 
         document.getElementById('send').addEventListener('click', () => {
-            if(!document.getElementById('username').value || !document.getElementById('message').value) {
+            let username = document.getElementById('username').value;
+            let message = document.getElementById('message').value;
+
+            if(!username || !message) {
                 return;
             }
+
+            message = message.replace(/(<([^>]+)>)/gi, '');
 
             fetch('/api', {
                 method: 'POST',
@@ -119,9 +124,9 @@
                 body: JSON.stringify({
                     type: 'postMessage',
                     message: {
-                        username: document.getElementById('username').value,
+                        username: username,
                         timestamp: new Date().toLocaleString(),
-                        content: document.getElementById('message').value,
+                        content: message,
                     },
                 }),
             });
