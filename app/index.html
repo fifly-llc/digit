@@ -46,6 +46,9 @@
 </body>
 
 <script>
+    let messageArray = [];
+    const messages = document.querySelector('.messages');
+
     function init() {
         fetch('/api', {
             method: 'POST',
@@ -69,10 +72,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        const messages = document.querySelector('.messages');
-
-        let messageArray = [];
-
         init();
 
         document.getElementById('send').addEventListener('click', () => {
