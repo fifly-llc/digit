@@ -41,6 +41,7 @@
 
 <body>
     <div class="send">
+        <input type="text" name="username" id="username">
         <input type="text" name="message" id="message">
         <button id="send">Send</button>
     </div>
@@ -67,7 +68,7 @@
             // Display messages after fetching is complete
             messageArray.forEach(message => {
                 let msg = message.content;
-                messages.innerHTML += '<div class="message">' + msg + '</div>';
+                messages.innerHTML += '<div class="message"><b>' + message.username + '</b>: ' + msg + '</div>';
             });
         });
     }
@@ -84,6 +85,7 @@
                 body: JSON.stringify({
                     type: 'postMessage',
                     message: {
+                        username: document.getElementById('username').value,
                         content: document.getElementById('message').value,
                     }
                 })
