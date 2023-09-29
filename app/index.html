@@ -62,6 +62,16 @@
             color: gray;
             margin-bottom: 5px;
         }
+
+        body .dark-mode {
+            background-color: black;
+            color: white;
+        }
+
+        body .light-mode {
+            background-color: white;
+            color: black;
+        }
     </style>
 </head>
 
@@ -104,6 +114,15 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        // Check if the user prefers dark mode
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            // User prefers dark mode, add dark mode styles
+            document.body.classList.add('dark-mode');
+        } else {
+            // User prefers light mode, add light mode styles
+            document.body.classList.add('light-mode');
+        }
+
         init();
 
         document.getElementById('send').addEventListener('click', () => {
