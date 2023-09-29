@@ -66,11 +66,6 @@
 </head>
 
 <body>
-    <div class="threads">
-        <button id="create">Create Thread</button>
-        <button id="join">Join Thread</button>
-        <button id="delete">Delete Thread</button>
-    </div>
     <div class="send">
         <label for="username">Username: </label>
         <input type="text" name="username" id="username">
@@ -103,7 +98,18 @@
             // Display messages after fetching is complete
             messageArray.forEach(message => {
                 let msg = message.content;
-                messages.innerHTML += '<div class="message"><i>' + message.timestamp + '</i><b>' + message.username + '</b>: ' + msg + '</div>';
+                let messg = document.createElement('div');
+                messg.classList.add('message');
+                let timestamp = document.createElement('i');
+                timestamp.innerText = message.timestamp;
+                let username = document.createElement('b');
+                username.innerText = message.username;
+                let txt = document.createElement('p');
+                txt.innerText = msg;
+                messg.appendChild(timestamp);
+                messg.appendChild(username);
+                messg.appendChild(txt);
+                messages.appendChild(messg);
             });
         });
     }
@@ -142,33 +148,9 @@
         });
     });
 
-    document.getElementById('create').addEventListener('click', () => {
-        let visibility = window.prompt("Set the visibility of the thread (public/private): ");
-        if(visibility === 'private') {
-            fetch('/api', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    type: 'createThread',
-                    visibility: 'private',
-                    password: window.prompt("Set the password for the thread: "),
-                }),
-            });
-        } else if (visibility === 'public') {
-            fetch('/api', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    type: 'createThread',
-                    visibility: 'public',
-                }),
-            });
-        }
-    })
+    setInterval(() => {
+        init();
+    }, 1000);
 </script>
 
 </html>
