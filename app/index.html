@@ -92,24 +92,13 @@
             return res.json();
         }).then(data => {
             messageArray = data.messages;
-
             messages.innerHTML = '';
 
             // Display messages after fetching is complete
             messageArray.forEach(message => {
                 let msg = message.content;
-                let messg = document.createElement('div');
-                messg.classList.add('message');
-                let timestamp = document.createElement('i');
-                timestamp.innerText = message.timestamp;
-                let username = document.createElement('b');
-                username.innerText = message.username;
-                let txt = document.createElement('p');
-                txt.innerText = msg;
-                messg.appendChild(timestamp);
-                messg.appendChild(username);
-                messg.appendChild(txt);
-                messages.appendChild(messg);
+                let messg = `<div class="message"><i>${message.timestamp}</i> <b>${message.username}</b>: ${msg}</div>`;
+                messages.innerHTML = messg + messages.innerHTML;
             });
         });
     }
@@ -124,8 +113,6 @@
             if(!username || !message) {
                 return;
             }
-
-            message = message.replace(/(<([^>]+)>)/gi, '');
 
             fetch('/api', {
                 method: 'POST',
