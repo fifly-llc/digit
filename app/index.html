@@ -66,6 +66,11 @@
 </head>
 
 <body>
+    <div class="threads">
+        <button id="create">Create Thread</button>
+        <button id="join">Join Thread</button>
+        <button id="delete">Delete Thread</button>
+    </div>
     <div class="send">
         <label for="username">Username: </label>
         <input type="text" name="username" id="username">
@@ -136,6 +141,34 @@
             init();
         });
     });
+
+    document.getElementById('create').addEventListener('click', () => {
+        let visibility = window.prompt("Set the visibility of the thread (public/private): ");
+        if(visibility === 'private') {
+            fetch('/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'createThread',
+                    visibility: 'private',
+                    password: window.prompt("Set the password for the thread: "),
+                }),
+            });
+        } else if (visibility === 'public') {
+            fetch('/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'createThread',
+                    visibility: 'public',
+                }),
+            });
+        }
+    })
 </script>
 
 </html>
