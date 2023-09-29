@@ -11,7 +11,7 @@ let threads = [];
 function sanitize(inputString) {
     const allowedTags = ['a', 'b', 'i', 'u', 'em', 'strong', 'span', 'abbr', 'acronym', 'address', 'bdo', 'big', 'cite', 'code', 'del', 'dfn', 'font', 'kbd', 'ins', 'mark', 'pre', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'small', 'strike', 'sub', 'sup', 'tt', 'var', 'bdi', 'bgsound', 'blink', 'spacer'];
 
-    const nonFormattingTagsRegex = new RegExp(`<(?!\/?(${allowedTags.join('|')}))([a-zA-Z-]+)(?:\s[^>]*)?>|<\/(?!${allowedTags.join('|')})[\s>])`, 'gi');
+    const nonFormattingTagsRegex = new RegExp(`<\\/?(?!(${allowedTags.join('|')}))([a-zA-Z-]+)(?:\\s[^>]*)?>`, 'gi');
     const outputString = inputString.replace(nonFormattingTagsRegex, '');
 
     return outputString.replace(/\s+/g, ' ').replace('&nbsp;', '').replace('\n', '');
