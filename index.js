@@ -59,7 +59,7 @@ app.post('/api', (req, res) => {
     if(body.type === 'getMessages') {
         res.send({ messages: messageArray });
     } else if (body.type === 'postMessage') {
-        messageArray.push({ content: sanitize(body.message), username: sanitize(body.username), timestamp: sanitize(body.timestamp) });
+        messageArray.push({ content: sanitize(body.message.content), username: sanitize(body.message.username), timestamp: sanitize(body.message.timestamp) });
         res.sendStatus(200);
     } else {
         res.sendStatus(400);
