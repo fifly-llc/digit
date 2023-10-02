@@ -271,7 +271,7 @@
         }).then(res => {
             return res.json();
         }).then(data => {
-            if (data.isSpeaking) {
+            if (data.audio !== 'none') {
                 document.getElementById('vc-other').style = 'border: 1px solid green;';
                 const audio = new Audio(data.audio);
                 audio.play();

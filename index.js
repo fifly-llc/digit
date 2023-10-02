@@ -17,6 +17,15 @@ function sanitize(inputString) {
     return outputString.replace(/\s+/g, ' ').replace('&nbsp;', '').replace('\n', '');
 }
 
+function generateUUID(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+}
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -61,6 +70,9 @@ app.post('/api', (req, res) => {
         if (vc) {
             res.send(vc.audio);
         }
+    } else if (body.type === 'startVoice') {
+        let code = generateUUID(6);
+        voiceChats.push({ code: code, audio: 'none' });
     } else {
         res.sendStatus(400);
     }
