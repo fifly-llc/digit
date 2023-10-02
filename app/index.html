@@ -72,10 +72,44 @@
             background-color: white;
             color: black;
         }
+
+        .voice {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: fit-content;
+        }
+
+        .voice button {
+            height: 30px;
+            border: 1px solid black;
+            border-radius: 5px;
+            padding: 5px;
+            margin-left: 10px;
+        }
+
+        .call {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: fit-content;
+        }
+
+        .call button {
+            height: 30px;
+            border: 1px solid black;
+            border-radius: 5px;
+            padding: 5px;
+            margin-left: 10px;
+        }
     </style>
 </head>
 
 <body>
+    <div class="voice">
+        <button id="start-voice">Start Voice Chat</button>
+        <button id="join-voice">Join Voice Chat</button>
+    </div>
     <div class="send">
         <label for="username">Username: </label>
         <input type="text" name="username" id="username">
@@ -89,6 +123,7 @@
 <script>
     let messageArray = [];
     const messages = document.querySelector('.messages');
+    let voiceChatCode = '';
     function init() {
         fetch('/api', {
             method: 'POST',
@@ -129,7 +164,7 @@
             let username = document.getElementById('username').value;
             let message = document.getElementById('message').value;
 
-            if(!username || !message) {
+            if (!username || !message) {
                 return;
             }
 
@@ -154,9 +189,109 @@
         });
     });
 
+    document.getElementById('start-voice').addEventListener('click', () => {
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'startVoice',
+            }),
+        }).then(res => {
+            return res.json();
+        }).then(data => {
+            voiceChatCode = data.code;
+            voiceChat();
+        });
+    });
+
+    document.getElementById('join-voice').addEventListener('click', () => {
+        voiceChatCode = window.prompt("Enter Voice Chat code: ");
+
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'joinVoice',
+                code: voiceChatCode,
+            }),
+        }).then(res => {
+            return res.json();
+        }).then(data => {
+            if (data.success) {
+                voiceChat();
+            } else {
+                alert(data.message);
+            }
+        });
+    });
+
+    async function voiceChat() {
+        let voiceChat = `<div class="call"><div>${voiceChatCode}</div><div class="profiles"><div id="vc-you">You</div><div id="vc-other">Other</div><button id="end-voice">Hang Up</button></div>`;
+        document.body.innerHTML = voiceChat;
+
+        await initVoice();
+
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.start();
+            mediaRecorder.ondataavailable = e => {
+                document.getElementById('vc-you').style = 'border: 1px solid green;';
+                const blob = new Blob([e.data], { type: 'audio/wav' });
+                const url = URL.createObjectURL(blob);
+                fetch('/api', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        type: 'postVoice',
+                        code: voiceChatCode,
+                        audio: url,
+                    }),
+                });
+            };
+
+            mediaRecorder.onstop = () => {
+                document.getElementById('vc-you').style = 'border: none;';
+            }
+        })
+    }
+
+    function initVoice() {
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'getVoice',
+                code: voiceChatCode,
+            }),
+        }).then(res => {
+            return res.json();
+        }).then(data => {
+            if (data.isSpeaking) {
+                document.getElementById('vc-other').style = 'border: 1px solid green;';
+                const audio = new Audio(data.audio);
+                audio.play();
+            } else {
+                document.getElementById('vc-other').style = 'border: none;';
+            }
+        });
+    }
+
     setInterval(() => {
-        init();
+        if(!voiceChatCode) {
+            init();
+        }
     }, 1000);
+
+    setInterval(() => {
+        if(voiceChatCode) {
+            initVoice();
+        }
+    }, 100);
 </script>
 
 </html>
