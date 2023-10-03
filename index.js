@@ -6,25 +6,6 @@ const app = express();
 const port = 3000;
 
 let messageArray = [];
-let voiceChats = [];
-
-function sanitize(inputString) {
-    const allowedTags = ['a', 'b', 'i', 'u', 'em', 'strong', 'span', 'abbr', 'acronym', 'address', 'bdo', 'big', 'cite', 'code', 'del', 'dfn', 'font', 'kbd', 'ins', 'mark', 'pre', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'small', 'strike', 'sub', 'sup', 'tt', 'var', 'bdi', 'bgsound', 'blink', 'spacer'];
-
-    const nonFormattingTagsRegex = new RegExp(`<\\/?(?!(${allowedTags.join('|')}))([a-zA-Z-]+)(?:\\s[^>]*)?>`, 'gi');
-    const outputString = inputString.replace(nonFormattingTagsRegex, '');
-
-    return outputString.replace(/\s+/g, ' ').replace('&nbsp;', '').replace('\n', '');
-}
-
-function generateUUID(length) {
-    let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-}
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -57,22 +38,11 @@ app.post('/api', (req, res) => {
     if (body.type === 'getMessages') {
         res.send({ messages: messageArray });
     } else if (body.type === 'postMessage') {
-        messageArray.push({ content: sanitize(body.message.content), username: sanitize(body.message.username), timestamp: sanitize(body.message.timestamp) });
+        messageArray.push({ content: body.message.content, username: body.message.username, timestamp: body.message.timestamp });
         res.sendStatus(200);
-    } else if (body.type === 'postVoice') {
-        let vc = voiceChats.find(vc => vc.code === body.code);
-        if (vc) {
-            vc.audio = body.audio;
-            res.sendStatus(200);
-        }
-    } else if (body.type === 'getVoice') {
-        let vc = voiceChats.find(vc => vc.code === body.code);
-        if (vc) {
-            res.send(vc.audio);
-        }
-    } else if (body.type === 'startVoice') {
-        let code = generateUUID(6);
-        voiceChats.push({ code: code, audio: 'none' });
+    } else if (body.type === 'botMessage') {
+        messageArray.push({ content: '<b><i style="color: lightblue; font-weight: bold; font-size: 16px;">' + body.message.content + '</i></b>', username: '[BOT] ' + body.message.username, timestamp: 'Automated Message' });
+        res.sendStatus(200);
     } else {
         res.sendStatus(400);
     }
