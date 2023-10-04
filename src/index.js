@@ -43,6 +43,8 @@ app.post('/api', (req, res) => {
     } else if (body.type === 'botMessage') {
         messageArray.push({ content: '<i style="color: black; font-weight: bold; font-size: 16px;">' + body.message.content + '</i>', username: '[BOT] ' + body.message.username, timestamp: 'Automated Message' });
         res.sendStatus(200);
+    } else if (body.type === 'getLatest') {
+        res.send({ message: messageArray[messageArray.length - 1] });
     } else {
         res.sendStatus(400);
     }
