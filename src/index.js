@@ -41,10 +41,11 @@ app.post('/api', (req, res) => {
         messageArray.push({ content: body.message.content, username: body.message.username, timestamp: body.message.timestamp });
         res.sendStatus(200);
     } else if (body.type === 'botMessage') {
-        messageArray.push({ content: '<i style="color: #5A5A5A; font-weight: bold;">' + body.message.content + '</i>', username: '[BOT] ' + body.message.username, timestamp: 'Automated Message' });
+        messageArray.push({ content: body.message.content, username: '[BOT] ' + body.message.username, timestamp: 'BOT MESSAGE' });
         res.sendStatus(200);
-    } else if (body.type === 'getLatest') {
-        res.send({ message: messageArray[messageArray.length - 1] });
+    } else if (body.type === 'systemMessage') {
+        messageArray.push({ content: body.message.content, username: '[SYSTEM] ', timestamp: 'SYSTEM MESSAGE' });
+        res.sendStatus(200);
     } else {
         res.sendStatus(400);
     }
