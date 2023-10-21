@@ -47,6 +47,17 @@ app.get("/app", (req, res) => {
     });
 });
 
+app.get("/portal", (req, res) => {
+    fs.readFile('./portal/index.html', 'utf8', (error, data) => {
+        if (error) {
+            console.error('Error reading file:', error);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.send(data);
+        }
+    });
+});
+
 app.post('/api', (req, res) => {
     let body = req.body;
 
