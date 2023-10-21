@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digit</title>
+    <title>Digit Admin Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
@@ -81,9 +81,15 @@
 
 <script>
     let messageArray = [];
+    let auth;
+    let canSendMessages = false;
     const messages = document.querySelector('.messages');
 
     function sendMessage() {
+        if(!canSendMessages) {
+            return;
+        }
+
         let username = document.getElementById('username').value;
         let message = document.getElementById('message').value;
 
@@ -97,7 +103,8 @@
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                type: 'postMessage',
+                type: 'adminMessage',
+                auth: auth,
                 message: {
                     username: username,
                     timestamp: new Date().toLocaleString(),
@@ -134,16 +141,29 @@
         });
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        init();
+    function authInit() {
+        auth = window.prompt("Enter Authentication Password for Admin Portal: ");
 
-        document.getElementById('send').addEventListener('click', () => {
-            sendMessage();
-        });
+        if (auth === fetch('/api', { method: 'POST', headers: { 'Content-Type': 'application/json', }, body: JSON.stringify({ type: 'getAdminAuth' }) }).then(res => { return res.json(); }).then(data => { return data.auth; })) {
+            canSendMessages = true;
+            
+            init();
+
+            document.getElementById('send').addEventListener('click', () => {
+                sendMessage();
+            });
+        } else {
+            window.alert('Incorrect Authentication for Admin Portal');
+            authInit();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        authInit();
     });
 
     document.addEventListener('keypress', (ev) => {
-        if(ev.key == "enter") {
+        if (ev.key == "enter") {
             sendMessage();
         }
     });
