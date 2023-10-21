@@ -143,6 +143,7 @@
 
     function authInit() {
         auth = window.prompt("Enter Authentication Password for Admin Portal: ");
+        console.log(auth);
 
         if (auth === fetch('/api', { method: 'POST', headers: { 'Content-Type': 'application/json', }, body: JSON.stringify({ type: 'getAdminAuth' }) }).then(res => { return res.json(); }).then(data => { return data.auth; })) {
             canSendMessages = true;
