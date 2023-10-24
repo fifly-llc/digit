@@ -7,20 +7,31 @@ const port = 3000;
 
 let messageArray = [];
 
-//let adminAuth = genRandom(5);
-let adminAuth = "441a"; // Set this to whatever or use random generation
+let adminAuth = "6619";
 
 console.log('[NOTICE] Authentication for Admin Portal is <' + adminAuth + '>.');
 
-/*function genRandom(length) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = ' ';
-    const charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+function handleSlashCommand(cmd) {
+    if (cmd.beginsWith('/')) {
+        cmd = cmd.substring(1);
+
+        if (cmd === 'clear') {
+            messageArray = [];
+        } else if (cmd.startsWith('warn')) {
+            choreHandler('warn', cmd.split(' ')[1] + " you have been warned for " + cmd.split(' ')[2].substring(8) + ".");
+        }
     }
-    return result;
-}*/
+
+    return;
+}
+
+function choreHandler(chore, message) {
+    if (chore === 'warn') {
+        messageArray.push({ content: message, username: '[CHORE] Warn Manager', timestamp: 'CHORE' });
+    }
+
+    return;
+}
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -64,8 +75,8 @@ app.post('/api', (req, res) => {
     if (body.type === 'getMessages') {
         res.send({ messages: messageArray });
     } else if (body.type === 'postMessage') {
-        if (body.message.username.startsWith('[ADMIN]') || body.message.username.startsWith('[BOT]') || body.message.username.startsWith('[SYSTEM]')) {
-            body.message.username = "I pretended to be an admin, a bot, or a system bot (" + body.message.username + ")";          
+        if (body.message.username.startsWith('[ADMIN]') || body.message.username.startsWith('[BOT]') || body.message.username.startsWith('[SYSTEM]') || body.message.username.startsWith('[CHORE]')) {
+            body.message.username = "Shame on me";       
         }
 
         messageArray.push({ content: body.message.content, username: body.message.username, timestamp: body.message.timestamp });
@@ -82,6 +93,13 @@ app.post('/api', (req, res) => {
         }
 
         messageArray.push({ content: body.message.content, username: '[ADMIN] ' + body.message.username, timestamp: body.message.timestamp });
+        res.sendStatus(200);
+    } else if (body.type === 'slashCommand') {
+        if (body.auth !== adminAuth) {
+            res.sendStatus(401);
+        }
+
+        handleSlashCommand(body.cmd);
         res.sendStatus(200);
     } else {
         res.sendStatus(400);

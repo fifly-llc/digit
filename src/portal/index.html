@@ -11,6 +11,8 @@
     <style>
         html {
             font-family: 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: rgb(51, 49, 49);
+            color: rgb(207, 205, 194);
         }
 
         .send {
@@ -48,7 +50,8 @@
             border: 1px solid black;
             border-radius: 5px;
             margin: 10px;
-            width: 300px;
+            width: -moz-fit-content;
+            width: fit-content;
         }
 
         .message i {
@@ -94,6 +97,26 @@
         let message = document.getElementById('message').value;
 
         if (!username || !message || username.trim() === '' || message.trim() === '') {
+            return;
+        }
+
+        if(message.beginsWith('/')) {
+            fetch('/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'slashCommand',
+                    auth: auth,
+                    cmd: message,
+                }),
+            });
+
+            document.getElementById('message').value = '';
+
+            init();
+
             return;
         }
 
