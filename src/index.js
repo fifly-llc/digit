@@ -11,20 +11,6 @@ let adminAuth = "6619";
 
 console.log('[NOTICE] Authentication for Admin Portal is <' + adminAuth + '>.');
 
-function handleSlashCommand(cmd) {
-    if (cmd.beginsWith('/')) {
-        cmd = cmd.substring(1);
-
-        if (cmd === 'clear') {
-            messageArray = [];
-        } else if (cmd.startsWith('warn')) {
-            choreHandler('warn', cmd.split(' ')[1] + " you have been warned for " + cmd.split(' ')[2].substring(8) + ".");
-        }
-    }
-
-    return;
-}
-
 function choreHandler(chore, message) {
     if (chore === 'warn') {
         messageArray.push({ content: message, username: '[CHORE] Warn Manager', timestamp: 'CHORE' });
@@ -93,13 +79,6 @@ app.post('/api', (req, res) => {
         }
 
         messageArray.push({ content: body.message.content, username: '[ADMIN] ' + body.message.username, timestamp: body.message.timestamp });
-        res.sendStatus(200);
-    } else if (body.type === 'slashCommand') {
-        if (body.auth !== adminAuth) {
-            res.sendStatus(401);
-        }
-
-        handleSlashCommand(body.cmd);
         res.sendStatus(200);
     } else {
         res.sendStatus(400);

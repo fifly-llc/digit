@@ -100,26 +100,6 @@
             return;
         }
 
-        if(message.beginsWith('/')) {
-            fetch('/api', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    type: 'slashCommand',
-                    auth: auth,
-                    cmd: message,
-                }),
-            });
-
-            document.getElementById('message').value = '';
-
-            init();
-
-            return;
-        }
-
         fetch('/api', {
             method: 'POST',
             headers: {
@@ -186,7 +166,7 @@
     });
 
     document.addEventListener('keypress', (ev) => {
-        if (ev.key == "enter") {
+        if (ev.key == "Enter") {
             sendMessage();
         }
     });
