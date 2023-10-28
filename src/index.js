@@ -6,8 +6,9 @@ const app = express();
 const port = 3000;
 
 let messageArray = [];
+let whiteboard = [400][400];
 
-let adminAuth = "6619";
+let adminAuth = "aa24";
 
 console.log('[NOTICE] Authentication for Admin Portal is <' + adminAuth + '>.');
 
@@ -79,6 +80,14 @@ app.post('/api', (req, res) => {
         }
 
         messageArray.push({ content: body.message.content, username: '[ADMIN] ' + body.message.username, timestamp: body.message.timestamp });
+        res.sendStatus(200);
+    } else if (body.type === 'choreMessage') {
+        messageArray.push({ content: body.message.content, username: '[SYSTEM] ' + body.message.username, timestamp: 'SYSTEM MESSAGE' });
+        res.sendStatus(200);
+    } else if (body.type === 'getWhiteboard') {
+        res.send({ whiteboard: whiteboard });
+    } else if (body.type === 'drawPixel') {
+        whiteboard[body.pos.x][body.pos.y] = body.color;
         res.sendStatus(200);
     } else {
         res.sendStatus(400);

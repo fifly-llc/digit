@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <style>
+        html {
+            font-family: 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: white;
+            color: rgb(75, 75, 70);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar"></div>
+    <canvas id="canvas" class="canvas" width="500" height="500"></canvas>
+    <script>
+        // Get the canvas element and its context
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        // Define the whiteboard
+        let whiteboard = [500][500];
+        // Variable to track whether the user is painting
+        var painting = false;
+        // Current color
+        let currentColor = 'black';
+
+        // Event listeners for mouse actions
+        canvas.addEventListener("mousedown", startPosition);
+        canvas.addEventListener("mouseup", endPosition);
+        canvas.addEventListener("mousemove", draw);
+
+        // Function to start painting
+        function startPosition(event) {
+            painting = true;
+            draw(event, currentColor); // Draw a pixel when the user clicks without moving the mouse
+        }
+
+        // Function to stop painting
+        function endPosition() {
+            painting = false;
+            ctx.beginPath(); // Start a new path for future drawings
+        }
+
+        // Function to draw on the canvas
+        function draw(event, color) {
+            if (!painting) return;
+
+            // Get mouse or touch coordinates relative to the canvas
+            var x, y;
+            if (event.type.includes("touch")) {
+                x = event.touches[0].clientX - canvas.offsetLeft;
+                y = event.touches[0].clientY - canvas.offsetTop;
+            } else {
+                x = event.clientX - canvas.offsetLeft;
+                y = event.clientY - canvas.offsetTop;
+            }
+
+            sendPixel(x, y, color);
+        }
+
+        function init() {
+            fetch('/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'getWhiteboard',
+                }),
+            }).then(res => {
+                return res.json();
+            }).then(data => {
+                whiteboard = data.whiteboard;
+            });
+
+            for (let y = 0; y < 500; y++) {
+                for (let x = 0; x < 500; x++) {
+                    drawPixel(x, y, whiteboard[x][y]);
+                }
+            }
+        }
+
+        function sendPixel(x, y, color) {
+            fetch('/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'drawPixel',
+                    pos: {
+                        x: x,
+                        y: y,
+                    },
+                    color: color,
+                }),
+            });
+
+            init();
+        }
+
+        // Function to draw a pixel on the canvas
+        function drawPixel(x, y, color) {
+            // Set the fill color
+            ctx.fillStyle = color;
+            // Draw a rectangle (pixel) at the specified coordinates
+            ctx.fillRect(x, y, 1, 1);
+        }
+    </script>
+</body>
+
+</html>
