@@ -45,8 +45,30 @@ app.get("/app", (req, res) => {
     });
 });
 
-app.get("/portal", (req, res) => {
-    fs.readFile('./portal/index.html', 'utf8', (error, data) => {
+app.get("/app/admin", (req, res) => {
+    fs.readFile('./app/admin/index.html', 'utf8', (error, data) => {
+        if (error) {
+            console.error('Error reading file:', error);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.send(data);
+        }
+    });
+});
+
+app.get("/whiteboard", (req, res) => {
+    fs.readFile('./whiteboard/index.html', 'utf8', (error, data) => {
+        if (error) {
+            console.error('Error reading file:', error);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.send(data);
+        }
+    });
+});
+
+app.get("/whiteboard/admin", (req, res) => {
+    fs.readFile('./whiteboard/admin/index.html', 'utf8', (error, data) => {
         if (error) {
             console.error('Error reading file:', error);
             res.status(500).send('Internal Server Error');
