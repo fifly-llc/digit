@@ -24,8 +24,6 @@
         // Get the canvas element and its context
         var canvas = document.getElementById("canvas");
         var ctx = canvas.getContext("2d");
-        // Define the whiteboard
-        let whiteboard = [500][500];
         // Variable to track whether the user is painting
         var painting = false;
         // Current color
@@ -77,14 +75,12 @@
             }).then(res => {
                 return res.json();
             }).then(data => {
-                whiteboard = data.whiteboard;
-            });
-
-            for (let y = 0; y < 500; y++) {
-                for (let x = 0; x < 500; x++) {
-                    drawPixel(x, y, whiteboard[x][y]);
+                for (let y = 0; y < 500; y++) {
+                    for (let x = 0; x < 500; x++) {
+                        drawPixel(x, y, data.whiteboard[x][y]);
+                    }
                 }
-            }
+            });
         }
 
         function sendPixel(x, y, color) {
