@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
-const badWords = require('bad-words');
+const Filter = require('./filter');
 
 const app = express();
 const port = 3000;
@@ -19,7 +19,7 @@ console.log('[NOTICE] Authentication for Admin Portal is <' + adminAuth + '>.');
 console.log('[NOTICE] Authentication for Control Panel is <' + controlAuth + '>.');
 
 function filter(text) {
-    const filter = new badWords();
+    const filter = new Filter();
     return filter.clean(text);
 }
 
