@@ -2,7 +2,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const Filter = require('./filter');
-const ip = require('ip');
 
 const app = express();
 const port = 3000;
