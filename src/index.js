@@ -94,10 +94,6 @@ app.post('/api', (req, res) => {
         messageArray.push({ content: body.message.content, username: '[SYSTEM] ' + body.message.username, timestamp: 'SYSTEM MESSAGE' });
         res.sendStatus(200);
     } else if (body.type === 'adminMessage') {
-        if (body.auth !== adminAuth) {
-            body.message.username = "I pretended to be an admin (" + body.message.username + ")";
-        }
-
         messageArray.push({ content: filter(body.message.content), username: filter("[ADMIN] " + body.message.username), timestamp: body.message.timestamp });
         res.sendStatus(200);
     } else if (body.type === 'clear') {
