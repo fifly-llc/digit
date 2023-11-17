@@ -83,8 +83,6 @@
 
     authInit();
 
-    document.getElementById('lock')
-
     document.getElementById('clear').addEventListener('click', () => {
         clear();
     });
@@ -95,6 +93,10 @@
 
     document.getElementById('kill').addEventListener('click', () => {
         kill();
+    });
+
+    document.getElementById('backup').addEventListener('click', () => {
+        refreshBackup();
     });
 
     function authInit() {
@@ -183,7 +185,9 @@
                 document.getElementById('lock').style.backgroundColor = 'red';
             }
         });
+    }
 
+    function refreshBackup() {
         fetch('/api', {
             method: 'POST',
             headers: {
