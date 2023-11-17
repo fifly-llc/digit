@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digit Control Panel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <style>
+        html {
+            font-family: 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: rgb(51, 49, 49);
+            color: rgb(207, 205, 194);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            gap: 10px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        button {
+            height: 30px;
+            border: 1px solid black;
+            border-radius: 5px;
+            padding: 5px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Digit Control Panel</h1>
+    <div class="controls">
+        <button id="clear">🧽 Clear All Messages 🧽</button>
+        <button id="lock"></button>
+        <button id="kill">⚠️ GLOBAL KILL SWITCH ⚠️</button>
+    </div>
+</body>
+
+<script>
+    let auth;
+    let canControl = false;
+
+    authInit();
+
+    document.getElementById('lock')
+
+    document.getElementById('clear').addEventListener('click', () => {
+        clear();
+    });
+
+    document.getElementById('lock').addEventListener('click', () => {
+        lock();
+    });
+
+    document.getElementById('kill').addEventListener('click', () => {
+        kill();
+    });
+
+    function authInit() {
+        auth = window.prompt("Enter Authentication Password for Control Panel: ");
+
+        if (auth === 'kkk0') {
+            canControl = true;
+        } else {
+            window.alert('Incorrect Authentication for Control Panel');
+            window.location.href = "https://digit.fifly.org";
+        }
+    }
+
+    function clear() {
+        if (!canControl) {
+            return;
+        }
+
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'clear',
+                auth: auth,
+            }),
+        });
+    }
+
+    function lock() {
+        if (!canControl) {
+            return;
+        }
+
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'lock',
+                auth: auth,
+            }),
+        });
+    }
+
+    function kill() {
+        if (!canControl) {
+            return;
+        }
+
+        if (!window.confirm('⚠️ GLOBAL KILL SWITCH ⚠️ Are you sure you want to do this?')) {
+            return;
+        }
+
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'kill',
+                auth: auth,
+            }),
+        });
+    }
+
+    function checkLocked() {
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'checkLocked',
+            }),
+        }).then(res => {
+            return res.json();
+        }).then(data => {
+            if (data.locked) {
+                document.getElementById('lock').innerHTML = '🔓 Unlock New Messages 🔓';
+                document.getElementById('lock').style.backgroundColor = 'green';
+            } else {
+                document.getElementById('lock').innerHTML = '🔒 Lock New Messages (Except Admin & Bot) 🔒';
+                document.getElementById('lock').style.backgroundColor = 'red';
+            }
+        })
+    }
+
+    setInterval(checkLocked, 100);
+</script>
+
+</html>

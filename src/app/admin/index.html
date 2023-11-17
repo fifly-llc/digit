@@ -68,6 +68,16 @@
             color: gray;
             margin-bottom: 5px;
         }
+
+        .notice {
+            font-weight: bold;
+            font-size: 12px;
+            color: gray;
+            margin-bottom: 5px;
+            margin-left: 10px;
+            margin-right: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -79,6 +89,7 @@
         <input type="text" name="message" id="message">
         <button id="send">Send</button>
     </div>
+    <p id="notice" class="notice"></p>
     <div class="messages"></div>
 </body>
 
@@ -89,31 +100,35 @@
     const messages = document.querySelector('.messages');
 
     function sendMessage() {
-        if(!canSendMessages) {
+        if (!canSendMessages) {
             return;
         }
 
-        let username = document.getElementById('username').value;
-        let message = document.getElementById('message').value;
+        let username = document.getElementById('username').value.trim();
+        let message = document.getElementById('message').value.trim();
 
-        if (!username || !message || username.trim() === '' || message.trim() === '') {
+        if (!username || !message) {
             return;
         }
+
+        let timestamp = new Date().toLocaleString();
+
+        let payload = {
+            type: 'adminMessage',
+            auth: auth,
+            message: {
+                username: username,
+                timestamp: timestamp,
+                content: message,
+            },
+        };
 
         fetch('/api', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                type: 'adminMessage',
-                auth: auth,
-                message: {
-                    username: username,
-                    timestamp: new Date().toLocaleString(),
-                    content: message,
-                },
-            }),
+            body: JSON.stringify(payload),
         });
 
         document.getElementById('message').value = '';
@@ -142,19 +157,29 @@
                 messages.innerHTML = messg + messages.innerHTML;
             });
         });
+
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'getMessage',
+            }),
+        })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('notice').innerHTML = data.message;
+            });
     }
 
     function authInit() {
-        auth = window.prompt("Enter Authentication Password for Admin Portal: ");
+        const auth = window.prompt("Enter Authentication Password for Admin Portal: ");
 
         if (auth === 'aa24') {
             canSendMessages = true;
-            
             init();
-
-            document.getElementById('send').addEventListener('click', () => {
-                sendMessage();
-            });
+            document.getElementById('send').addEventListener('click', sendMessage);
         } else {
             window.alert('Incorrect Authentication for Admin Portal');
             window.location.href = "https://digit.fifly.org";
@@ -171,9 +196,7 @@
         }
     });
 
-    setInterval(() => {
-        init();
-    }, 500);
+    setInterval(init, 100);
 </script>
 
 </html>

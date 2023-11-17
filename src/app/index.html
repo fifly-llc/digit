@@ -68,6 +68,16 @@
             color: gray;
             margin-bottom: 5px;
         }
+
+        .notice {
+            font-weight: bold;
+            font-size: 12px;
+            color: gray;
+            margin-bottom: 5px;
+            margin-left: 10px;
+            margin-right: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -79,6 +89,7 @@
         <input type="text" name="message" id="message">
         <button id="send">Send</button>
     </div>
+    <p class="notice" id="notice"></p>
     <div class="messages"></div>
 </body>
 
@@ -87,10 +98,10 @@
     const messages = document.querySelector('.messages');
 
     function sendMessage() {
-        let username = document.getElementById('username').value;
-        let message = document.getElementById('message').value;
+        let username = document.getElementById('username').value.trim();
+        let message = document.getElementById('message').value.trim();
 
-        if (!username || !message || username.trim() === '' || message.trim() === '') {
+        if (!username || !message) {
             return;
         }
 
@@ -102,7 +113,7 @@
             body: JSON.stringify({
                 type: 'postMessage',
                 message: {
-                    username: username,
+                    username,
                     timestamp: new Date().toLocaleString(),
                     content: message,
                 },
@@ -123,18 +134,32 @@
             body: JSON.stringify({
                 type: 'getMessages',
             })
-        }).then(res => {
-            return res.json();
-        }).then(data => {
-            messageArray = data.messages;
-            messages.innerHTML = '';
+        })
+            .then(res => res.json())
+            .then(data => {
+                messageArray = data.messages;
+                messages.innerHTML = '';
 
-            messageArray.forEach(message => {
-                let msg = message.content;
-                let messg = `<div class="message"><i>${message.timestamp}</i> <b>${message.username}</b>: ${msg}</div>`;
-                messages.innerHTML = messg + messages.innerHTML;
+                messageArray.forEach(message => {
+                    let msg = message.content;
+                    let messg = `<div class="message"><i>${message.timestamp}</i> <b>${message.username}</b>: ${msg}</div>`;
+                    messages.innerHTML = messg + messages.innerHTML;
+                });
             });
-        });
+
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'getMessage',
+            }),
+        })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('notice').innerHTML = data.message;
+            });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -146,14 +171,12 @@
     });
 
     document.addEventListener('keypress', (ev) => {
-        if(ev.key == "Enter") {
+        if (ev.key == "Enter") {
             sendMessage();
         }
     });
 
-    setInterval(() => {
-        init();
-    }, 500);
+    setInterval(init, 100);
 </script>
 
 </html>
