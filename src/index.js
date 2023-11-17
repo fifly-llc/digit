@@ -99,7 +99,7 @@ app.post('/api', (req, res) => {
         res.sendStatus(200);
     } else if (body.type === 'adminMessage') {
         messageArray.push({ content: filter(body.message.content), username: filter("[ADMIN] " + body.message.username), timestamp: body.message.timestamp + ' - ' + req.ip });
-        messageArray.push({ content: filter(body.message.content), username: filter("[ADMIN] " + body.message.username), timestamp: body.message.timestamp + ' - ' + req.ip });
+        messageBackup.push({ content: filter(body.message.content), username: filter("[ADMIN] " + body.message.username), timestamp: body.message.timestamp + ' - ' + req.ip });
         res.sendStatus(200);
     } else if (body.type === 'clear') {
         if (body.auth !== controlAuth) {
