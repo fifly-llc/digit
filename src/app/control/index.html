@@ -20,12 +20,21 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            height: fit-content;
             width: 100vw;
             gap: 10px;
         }
 
-        h1 {
+        .backup {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: fit-content;
+            width: 100vw;
+        }
+
+        h1, h2 {
             text-align: center;
             margin-bottom: 10px;
         }
@@ -37,6 +46,22 @@
             padding: 5px;
             margin-left: 10px;
         }
+
+        .message {
+            padding: 10px;
+            border: 1px solid black;
+            border-radius: 5px;
+            margin: 10px;
+            width: -moz-fit-content;
+            width: fit-content;
+        }
+
+        .message i {
+            font-style: italic;
+            font-size: 12px;
+            color: gray;
+            margin-right: 10px;
+        }
     </style>
 </head>
 
@@ -46,7 +71,10 @@
         <button id="clear">🧽 Clear All Messages 🧽</button>
         <button id="lock"></button>
         <button id="kill">⚠️ GLOBAL KILL SWITCH ⚠️</button>
+        <button id="backup">📦 View Backup 📦</button>
     </div>
+    <h2>Backup Viewer:</h2>
+    <div id="backup-view" class="backup"></div>
 </body>
 
 <script>
@@ -135,7 +163,7 @@
         });
     }
 
-    function checkLocked() {
+    function init() {
         fetch('/api', {
             method: 'POST',
             headers: {
@@ -154,10 +182,33 @@
                 document.getElementById('lock').innerHTML = '🔒 Lock New Messages (Except Admin & Bot) 🔒';
                 document.getElementById('lock').style.backgroundColor = 'red';
             }
+        });
+
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'getBackup',
+                auth: auth,
+            })
         })
+            .then(res => res.json())
+            .then(data => {
+                messages = document.getElementById('backup-view');
+                messageArray = data.messages;
+                messages.innerHTML = '';
+
+                messageArray.forEach(message => {
+                    let msg = message.content;
+                    let messg = `<div class="message"><i>${message.timestamp}</i> <b>${message.username}</b>: ${msg}</div>`;
+                    messages.innerHTML = messg + messages.innerHTML;
+                });
+            });
     }
 
-    setInterval(checkLocked, 100);
+    setInterval(init, 100);
 </script>
 
 </html>

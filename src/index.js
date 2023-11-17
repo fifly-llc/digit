@@ -2,11 +2,13 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const Filter = require('./filter');
+const ip = require('ip');
 
 const app = express();
 const port = 3000;
 
 let messageArray = [];
+let messageBackup = [];
 
 let locked = false;
 
@@ -81,20 +83,24 @@ app.post('/api', (req, res) => {
             return;
         }
 
-        if (body.message.username.startsWith('[ADMIN]') || body.message.username.startsWith('[BOT]') || body.message.username.startsWith('[SYSTEM]') || body.message.username.startsWith('[CHORE]')) {
+        if (body.message.username.startsWith('[ADMIN]') || body.message.username.startsWith('[BOT]') || body.message.username.startsWith('[SYSTEM]')) {
             body.message.username = "Shame on me";
         }
 
-        messageArray.push({ content: filter(body.message.content), username: filter(body.message.username), timestamp: body.message.timestamp });
+        messageArray.push({ content: filter(body.message.content), username: filter(body.message.username), timestamp: body.message.timestamp + ' - ' + req.ip });
+        messageBackup.push({ content: filter(body.message.content), username: filter(body.message.username), timestamp: body.message.timestamp + ' - ' + req.ip });
         res.sendStatus(200);
     } else if (body.type === 'botMessage') {
         messageArray.push({ content: body.message.content, username: '[BOT] ' + body.message.username, timestamp: 'BOT MESSAGE' });
+        messageBackup.push({ content: body.message.content, username: '[BOT] ' + body.message.username, timestamp: 'BOT MESSAGE' });
         res.sendStatus(200);
     } else if (body.type === 'systemMessage') {
         messageArray.push({ content: body.message.content, username: '[SYSTEM] ' + body.message.username, timestamp: 'SYSTEM MESSAGE' });
+        messageBackup.push({ content: body.message.content, username: '[SYSTEM] ' + body.message.username, timestamp: 'SYSTEM MESSAGE' });
         res.sendStatus(200);
     } else if (body.type === 'adminMessage') {
-        messageArray.push({ content: filter(body.message.content), username: filter("[ADMIN] " + body.message.username), timestamp: body.message.timestamp });
+        messageArray.push({ content: filter(body.message.content), username: filter("[ADMIN] " + body.message.username), timestamp: body.message.timestamp + ' - ' + req.ip });
+        messageArray.push({ content: filter(body.message.content), username: filter("[ADMIN] " + body.message.username), timestamp: body.message.timestamp + ' - ' + req.ip });
         res.sendStatus(200);
     } else if (body.type === 'clear') {
         if (body.auth !== controlAuth) {
@@ -128,6 +134,13 @@ app.post('/api', (req, res) => {
         res.send({ locked: locked });
     } else if (body.type === 'getMessage') {
         res.send({ message: mainMessage });
+    } else if (body.type === 'getBackup') {
+        if (body.auth !== controlAuth) {
+            res.sendStatus(401);
+            return;
+        }
+
+        res.send({ messages: messageBackup });
     } else {
         res.sendStatus(400);
     }
