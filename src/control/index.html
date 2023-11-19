@@ -70,7 +70,7 @@
     <div class="controls">
         <button id="clear">🧽 Clear All Messages 🧽</button>
         <button id="lock"></button>
-        <button id="kill">⚠️ GLOBAL KILL SWITCH ⚠️</button>
+        <button id="kill"></button>
         <button id="backup">📦 View Backup 📦</button>
     </div>
     <h2>Backup Viewer:</h2>
@@ -149,10 +149,6 @@
             return;
         }
 
-        if (!window.confirm('⚠️ GLOBAL KILL SWITCH ⚠️ Are you sure you want to do this?')) {
-            return;
-        }
-
         fetch('/api', {
             method: 'POST',
             headers: {
@@ -183,6 +179,26 @@
             } else {
                 document.getElementById('lock').innerHTML = '🔒 Lock New Messages (Except Admin & Bot) 🔒';
                 document.getElementById('lock').style.backgroundColor = 'red';
+            }
+        });
+
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'checkKilled',
+            }),
+        }).then(res => {
+            return res.json();
+        }).then(data => {
+            if (data.killed) {
+                document.getElementById('kill').innerHTML = '⚠️ GLOBAL BLOCK SWITCH (ON) ⚠️';
+                document.getElementById('kill').style.backgroundColor = 'green';
+            } else {
+                document.getElementById('kill').innerHTML = '⚠️ GLOBAL BLOCK SWITCH (OFF) ⚠️';
+                document.getElementById('kill').style.backgroundColor = 'red';
             }
         });
     }
