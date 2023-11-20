@@ -26,19 +26,19 @@ function filter(text) {
 }
 
 function blockPage() {
-    return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Access Denied</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"crossorigin="anonymous" /><style>body {font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;background-color: #f8f9fa;margin: 0;padding: 0;display: flex;flex-direction: column;align-items: center;justify-content: center;height: 100vh;}.container {text-align: center;}.icon {color: #dc3545;font-size: 5em;}h1 {color: #dc3545;margin-top: 10px;}p {color: #6c757d;margin-top: 10px;}footer {position: fixed;bottom: 0;left: 0;width: 100%;background-color: #343a40;color: #ffffff;padding: 10px;text-align: center;}</style></head><body><div class="container"><div class="icon"><i class="fas fa-times-circle"></i></div><h1>Access Denied</h1><p>You have been blocked from this site.</p></div><footer>Time: <span id="time"></span></footer><script>setInterval(() => {document.getElementById("time").innerHTML = new Date().toLocaleString();}, 1000);</script></body></html>`;
+    return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Access Denied</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"crossorigin="anonymous" /><style>body {font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;background-color: #f8f9fa;margin: 0;padding: 0;display: flex;flex-direction: column;align-items: center;justify-content: center;height: 100vh;}.container {text-align: center;}.icon {color: #dc3545;font-size: 5em;}h1 {color: #dc3545;margin-top: 10px;}p {color: #6c757d;margin-top: 10px;}footer {position: fixed;bottom: 0;left: 0;width: 100%;background-color: #343a40;color: #ffffff;padding: 10px;text-align: center;}</style></head><body><div class="container"><div class="icon"><i class="fas fa-times-circle"></i></div><h1>Access Denied</h1><p>You have been blocked from this site.</p></div><footer>Time: <span id="time"></span></footer><script>setInterval(() => {document.getElementById("time").innerHTML = new Date().toLocaleString();fetch("/api",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({type:"checkKilled"})}).then(e=>e.json()).then(e=>{if(e.killed === false){window.location.reload()}});}, 1000);</script></body></html>`;
 }
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.get("/", (req, res) => {
-    if (killed) {
+function readFileAndSend(res, filePath) {
+    if (killed && filePath !== './control/index.html') {
         res.send(blockPage());
         return;
     }
 
-    fs.readFile('./index.html', 'utf8', (error, data) => {
+    fs.readFile(filePath, 'utf8', (error, data) => {
         if (error) {
             console.error('Error reading file:', error);
             res.status(500).send('Internal Server Error');
@@ -46,130 +46,197 @@ app.get("/", (req, res) => {
             res.send(data);
         }
     });
+}
+
+app.get("/", (req, res) => {
+    readFileAndSend(res, './index.html');
 });
 
 app.get("/app", (req, res) => {
-    if (killed) {
-        res.send(blockPage());
-        return;
-    }
-
-    fs.readFile('./app/index.html', 'utf8', (error, data) => {
-        if (error) {
-            console.error('Error reading file:', error);
-            res.status(500).send('Internal Server Error');
-        } else {
-            res.send(data);
-        }
-    });
+    readFileAndSend(res, './app/index.html');
 });
 
 app.get("/app/admin", (req, res) => {
-    if (killed) {
-        res.send(blockPage());
-        return;
-    }
-
-    fs.readFile('./app/admin/index.html', 'utf8', (error, data) => {
-        if (error) {
-            console.error('Error reading file:', error);
-            res.status(500).send('Internal Server Error');
-        } else {
-            res.send(data);
-        }
-    });
+    readFileAndSend(res, './app/admin/index.html');
 });
 
 app.get("/control", (req, res) => {
-    fs.readFile('./control/index.html', 'utf8', (error, data) => {
-        if (error) {
-            console.error('Error reading file:', error);
-            res.status(500).send('Internal Server Error');
-        } else {
-            res.send(data);
-        }
-    });
+    readFileAndSend(res, './control/index.html');
 });
 
 app.post('/api', (req, res) => {
     let body = req.body;
 
-    if (body.type === 'getMessages') {
-        res.send({ messages: messageArray });
-    } else if (body.type === 'postMessage') {
-        if (locked) {
-            res.sendStatus(403);
-            return;
-        }
-
-        if (body.message.username.startsWith('[ADMIN]') || body.message.username.startsWith('[BOT]') || body.message.username.startsWith('[SYSTEM]')) {
-            body.message.username = "Shame on me";
-        }
-
-        messageArray.push({ content: filter(body.message.content), username: filter(body.message.username), timestamp: body.message.timestamp + ' - ' + req.ip });
-        messageBackup.push({ content: filter(body.message.content), username: filter(body.message.username), timestamp: body.message.timestamp + ' - ' + req.ip });
-        res.sendStatus(200);
-    } else if (body.type === 'botMessage') {
-        messageArray.push({ content: body.message.content, username: '[BOT] ' + body.message.username, timestamp: 'BOT MESSAGE' });
-        messageBackup.push({ content: body.message.content, username: '[BOT] ' + body.message.username, timestamp: 'BOT MESSAGE' });
-        res.sendStatus(200);
-    } else if (body.type === 'systemMessage') {
-        messageArray.push({ content: body.message.content, username: '[SYSTEM] ' + body.message.username, timestamp: 'SYSTEM MESSAGE' });
-        messageBackup.push({ content: body.message.content, username: '[SYSTEM] ' + body.message.username, timestamp: 'SYSTEM MESSAGE' });
-        res.sendStatus(200);
-    } else if (body.type === 'adminMessage') {
-        messageArray.push({ content: filter(body.message.content), username: filter("[ADMIN] " + body.message.username), timestamp: body.message.timestamp + ' - ' + req.ip });
-        messageBackup.push({ content: filter(body.message.content), username: filter("[ADMIN] " + body.message.username), timestamp: body.message.timestamp + ' - ' + req.ip });
-        res.sendStatus(200);
-    } else if (body.type === 'clear') {
-        if (body.auth !== controlAuth) {
-            res.sendStatus(401);
-            return;
-        }
-
-        messageArray = [];
-        res.sendStatus(200);
-    } else if (body.type === 'lock') {
-        if (body.auth !== controlAuth) {
-            res.sendStatus(401);
-            return;
-        }
-
-        if (locked) {
-            mainMessage = "Thread is 🔓 Unlocked 🔓";
-            locked = false;
-        } else {
-            mainMessage = "Thread is 🔒 Locked 🔒";
-            locked = true;
-        }
-    } else if (body.type === 'kill') {
-        if (body.auth !== controlAuth) {
-            res.sendStatus(401);
-            return;
-        }
-
-        if (killed) {
-            killed = false;
-        } else {
-            killed = true;
-        }
-    } else if (body.type === 'checkLocked') {
-        res.send({ locked: locked });
-    } else if (body.type === 'getMessage') {
-        res.send({ message: mainMessage });
-    } else if (body.type === 'getBackup') {
-        if (body.auth !== controlAuth) {
-            res.sendStatus(401);
-            return;
-        }
-
-        res.send({ messages: messageBackup });
-    } else if (body.type === 'checkKilled') {
-        res.send({ killed: killed });
-    } else {
-        res.sendStatus(400);
+    switch (body.type) {
+        case 'getMessages':
+            res.send({ messages: messageArray });
+            break;
+        case 'postMessage':
+            handlePostMessage(body, req, res);
+            break;
+        case 'botMessage':
+            handleBotMessage(body, res);
+            break;
+        case 'systemMessage':
+            handleSystemMessage(body, res);
+            break;
+        case 'adminMessage':
+            handleAdminMessage(body, req, res);
+            break;
+        case 'clear':
+            handleClear(body, res);
+            break;
+        case 'lock':
+            handleLock(body, res);
+            break;
+        case 'kill':
+            handleKill(body, res);
+            break;
+        case 'checkLocked':
+            res.send({ locked: locked });
+            break;
+        case 'getMessage':
+            res.send({ message: mainMessage });
+            break;
+        case 'getBackup':
+            handleGetBackup(body, res);
+            break;
+        case 'checkKilled':
+            res.send({ killed: killed });
+            break;
+        default:
+            res.sendStatus(400);
     }
 });
+
+function handlePostMessage(body, req, res) {
+    if (locked) {
+        res.sendStatus(403);
+        return;
+    }
+
+    let sanitizedUsername = sanitizeUsername(body.message.username);
+
+    messageArray.push({
+        content: filter(body.message.content),
+        username: filter(sanitizedUsername),
+        timestamp: body.message.timestamp + ' - ' + req.connection.remoteAddress || req.headers['x-forwarded-for'] || req.socket.remoteAddress
+    });
+
+    messageBackup.push({
+        content: filter(body.message.content),
+        username: filter(sanitizedUsername),
+        timestamp: body.message.timestamp + ' - ' + req.connection.remoteAddress || req.headers['x-forwarded-for'] || req.socket.remoteAddress
+    });
+
+    res.sendStatus(200);
+}
+
+function handleBotMessage(body, res) {
+    messageArray.push({
+        content: body.message.content,
+        username: '[BOT] ' + body.message.username,
+        timestamp: 'BOT MESSAGE'
+    });
+
+    messageBackup.push({
+        content: body.message.content,
+        username: '[BOT] ' + body.message.username,
+        timestamp: 'BOT MESSAGE'
+    });
+
+    res.sendStatus(200);
+}
+
+function handleSystemMessage(body, res) {
+    messageArray.push({
+        content: body.message.content,
+        username: '[SYSTEM] ' + body.message.username,
+        timestamp: 'SYSTEM MESSAGE'
+    });
+
+    messageBackup.push({
+        content: body.message.content,
+        username: '[SYSTEM] ' + body.message.username,
+        timestamp: 'SYSTEM MESSAGE'
+    });
+
+    res.sendStatus(200);
+}
+
+function handleAdminMessage(body, req, res) {
+    let sanitizedUsername = sanitizeUsername("[ADMIN] " + body.message.username);
+
+    messageArray.push({
+        content: filter(body.message.content),
+        username: filter(sanitizedUsername),
+        timestamp: body.message.timestamp + ' - ' + req.connection.remoteAddress || req.headers['x-forwarded-for'] || req.socket.remoteAddress
+    });
+
+    messageBackup.push({
+        content: filter(body.message.content),
+        username: filter(sanitizedUsername),
+        timestamp: body.message.timestamp + ' - ' + req.connection.remoteAddress || req.headers['x-forwarded-for'] || req.socket.remoteAddress
+    });
+
+    res.sendStatus(200);
+}
+
+function handleClear(body, res) {
+    if (body.auth !== controlAuth) {
+        res.sendStatus(401);
+        return;
+    }
+
+    messageArray = [];
+    res.sendStatus(200);
+}
+
+function handleLock(body, res) {
+    if (body.auth !== controlAuth) {
+        res.sendStatus(401);
+        return;
+    }
+
+    if (locked) {
+        mainMessage = "Thread is 🔓 Unlocked 🔓";
+        locked = false;
+    } else {
+        mainMessage = "Thread is 🔒 Locked 🔒";
+        locked = true;
+    }
+
+    res.sendStatus(200);
+}
+
+function handleKill(body, res) {
+    if (body.auth !== controlAuth) {
+        res.sendStatus(401);
+        return;
+    }
+
+    killed = !killed;
+    res.sendStatus(200);
+}
+
+function handleGetBackup(body, res) {
+    if (body.auth !== controlAuth) {
+        res.sendStatus(401);
+        return;
+    }
+
+    res.send({ messages: messageBackup });
+}
+
+function sanitizeUsername(username) {
+    const prefixes = ['[ADMIN]', '[BOT]', '[SYSTEM]'];
+    for (const prefix of prefixes) {
+        if (username.startsWith(prefix)) {
+            return "Shame on me";
+        }
+    }
+    return username;
+}
 
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);

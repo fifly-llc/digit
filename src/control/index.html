@@ -34,7 +34,8 @@
             width: 100vw;
         }
 
-        h1, h2 {
+        h1,
+        h2 {
             text-align: center;
             margin-bottom: 10px;
         }
@@ -73,7 +74,7 @@
         <button id="kill"></button>
         <button id="backup">📦 View Backup 📦</button>
     </div>
-    <h2>Backup Viewer:</h2>
+    <h2 style="display: none;" id="backup-view-header">Backup Viewer:</h2>
     <div id="backup-view" class="backup"></div>
 </body>
 
@@ -162,6 +163,10 @@
     }
 
     function init() {
+        if (!canControl) {
+            return;
+        }
+
         fetch('/api', {
             method: 'POST',
             headers: {
@@ -204,6 +209,10 @@
     }
 
     function refreshBackup() {
+        if (!canControl) {
+            return;
+        }
+
         fetch('/api', {
             method: 'POST',
             headers: {
@@ -218,6 +227,14 @@
             .then(data => {
                 messages = document.getElementById('backup-view');
                 messageArray = data.messages;
+
+                if (messageArray.length === 0) {
+                    messages.innerHTML = 'No backup found';
+                    return;
+                }
+
+                document.getElementById('backup-view-header').style.display = 'block';
+                
                 messages.innerHTML = '';
 
                 messageArray.forEach(message => {

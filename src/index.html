@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -38,4 +39,23 @@
     <button><a href="/app/admin">Chat App (Admin)</a></button>
     <button><a href="/control">Control Panel</a></button>
 </body>
+
+<script>
+    setInterval(() => {
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'checkKilled',
+            }),
+        }).then(res => res.json()).then(data => {
+            if (data.killed) {
+                window.location.reload();
+            }
+        });
+    }, 100);
+</script>
+
 </html>
