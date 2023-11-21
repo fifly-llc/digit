@@ -22,19 +22,14 @@
             height: fit-content;
         }
 
-        .send input {
+        input {
             width: 300px;
             height: 30px;
             border: 1px solid black;
             border-radius: 5px;
             padding: 5px;
-        }
-
-        input {
             margin-right: 10px;
             margin-bottom: 10px;
-            width: 300px;
-            height: 30px;
         }
 
         .send button {
@@ -50,18 +45,10 @@
             border: 1px solid black;
             border-radius: 5px;
             margin: 10px;
-            width: -moz-fit-content;
             width: fit-content;
         }
 
-        label {
-            margin-right: 10px;
-            font-weight: bold;
-            font-size: 12px;
-            color: gray;
-            margin-bottom: 5px;
-        }
-
+        label,
         .notice {
             font-weight: bold;
             font-size: 12px;
@@ -80,181 +67,170 @@
         <input type="text" name="username" id="username">
         <label for="message">Message: </label>
         <input type="text" name="message" id="message">
-        <button id="send">Send</button>
+        <button id="send" disabled>Send</button>
     </div>
     <p id="notice" class="notice"></p>
     <div class="messages"></div>
-</body>
 
-<script>
-    let messageArray = [];
-    let auth;
-    let canSendMessages = false;
-    const messages = document.querySelector('.messages');
+    <script>
+        let messageArray = [];
+        let auth;
+        let canSendMessages = false;
+        const messages = document.querySelector('.messages');
+        const sendButton = document.getElementById('send');
 
-    function sendMessage() {
-        if (!canSendMessages) {
-            return;
-        }
-
-        let username = document.getElementById('username').value.trim();
-        let message = document.getElementById('message').value.trim();
-
-        if (!username || !message) {
-            return;
-        }
-
-        let timestamp = new Date().toLocaleString();
-
-        let payload = {
-            type: 'managerMessage',
-            auth: auth,
-            message: {
-                username: username,
-                timestamp: timestamp,
-                content: message,
-            },
-        };
-
-        fetch('/api', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(payload),
-        });
-
-        document.getElementById('message').value = '';
-
-        init();
-    }
-
-    function getBadge(badge) {
-        switch (badge) {
-            case 'verified-bot':
-                return {
-                    emoji: '🤖',
-                    title: 'Verified Bot',
-                }
-            case 'admin':
-                return {
-                    emoji: '🛠️',
-                    title: 'Admin',
-                }
-            case 'verified':
-                return {
-                    emoji: '✅',
-                    title: 'Verified',
-                }
-            case 'manager':
-                return {
-                    emoji: '💼',
-                    title: 'Admin Manager',
-                }
-            case 'verified-system':
-                return {
-                    emoji: '⚙️',
-                    title: 'Verified System',
-                }
-            default:
-                return '';
-        }
-    }
-
-    function init() {
-        fetch('/api', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                type: 'checkKilled',
-            }),
-        }).then(res => res.json()).then(data => {
-            if (data.killed) {
-                window.location.reload();
+        function sendMessage() {
+            if (!canSendMessages) {
+                return;
             }
-        });
 
-        fetch('/api', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                type: 'getMessages',
-            })
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (JSON.stringify(messageArray) === JSON.stringify(data.messages)) {
-                    return;
-                }
+            const username = document.getElementById('username').value.trim();
+            const message = document.getElementById('message').value.trim();
 
-                messageArray = data.messages;
-                messages.innerHTML = '';
+            if (!username || !message) {
+                return;
+            }
 
-                messageArray.forEach(message => {
-                    let username = message.username;
+            const timestamp = new Date().toLocaleString();
 
-                    message.badges.forEach(badge => {
-                        let { emoji, title } = getBadge(badge);
-                        username += ` <span title="${title}">${emoji}</span>`;
-                    });
-
-                    let messageHTML = `<div class="message"><i>${message.timestamp}</i> <b>${username}</b>: ${message.content}</div>`;
-                    messages.innerHTML = messageHTML + messages.innerHTML;
-                });
-            });
-
-        fetch('/api', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                type: 'getMessage',
-            }),
-        })
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('notice').innerHTML = data.message;
-            });
-    }
-
-    function authInit() {
-        const auth = window.prompt("Enter Authentication Password for Admin Portal: ");
-
-        fetch('/api', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                type: 'checkAuthCorrect',
+            const payload = {
+                type: 'managerMessage',
                 auth: auth,
-            }),
-        }).then(res => res.json()).then(data => {
-            if (data.correct) {
-                canSendMessages = true;
-            } else {
-                window.alert('Incorrect Authentication for Admin Portal');
-                window.location.href = "https://digit.fifly.org";
-            }
-        });
-    }
+                message: {
+                    username: username,
+                    timestamp: timestamp,
+                    content: message,
+                },
+            };
 
-    document.addEventListener('DOMContentLoaded', () => {
-        authInit();
-    });
+            fetch('/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
 
-    document.addEventListener('keypress', (ev) => {
-        if (ev.key == "Enter") {
-            sendMessage();
+            document.getElementById('message').value = '';
+            init();
         }
-    });
 
-    setInterval(init, 100);
-</script>
+        function getBadge(badge) {
+            const badgeInfo = {
+                'verified-bot': { emoji: '🤖', title: 'Verified Bot' },
+                'admin': { emoji: '🛠️', title: 'Admin' },
+                'verified': { emoji: '✅', title: 'Verified' },
+                'manager': { emoji: '💼', title: 'Admin Manager' },
+                'verified-system': { emoji: '⚙️', title: 'Verified System' },
+            };
+
+            return badgeInfo[badge] || '';
+        }
+
+        function renderMessages() {
+            messages.innerHTML = '';
+
+            messageArray.forEach(message => {
+                const username = message.username + message.badges.map(getBadge).map(({ emoji, title }) => ` <span title="${title}">${emoji}</span>`).join('');
+
+                const messageHTML = `<div class="message"><i>${message.timestamp}</i> <b>${username}</b>: ${message.content}</div>`;
+                messages.innerHTML = messageHTML + messages.innerHTML;
+            });
+        }
+
+        function init() {
+            fetch('/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'checkKilled',
+                }),
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.killed) {
+                        window.location.reload();
+                    }
+                });
+
+            fetch('/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'getMessages',
+                }),
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (JSON.stringify(messageArray) === JSON.stringify(data.messages)) {
+                        return;
+                    }
+
+                    messageArray = data.messages;
+                    renderMessages();
+                });
+
+            fetch('/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'getMessage',
+                }),
+            })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('notice').innerHTML = data.message;
+                });
+        }
+
+        function authInit() {
+            auth = window.prompt("Enter Authentication Password for Admin Portal: ");
+
+            fetch('/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'checkAuthCorrect',
+                    auth: auth,
+                }),
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.correct) {
+                        canSendMessages = true;
+                        sendButton.disabled = false;
+                    } else {
+                        window.alert('Incorrect Authentication for Admin Portal');
+                        window.location.href = "https://digit.fifly.org";
+                    }
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            authInit();
+
+            document.getElementById('send').addEventListener('click', () => {
+                sendMessage();
+            });
+
+            document.addEventListener('keypress', (ev) => {
+                if (ev.key == "Enter") {
+                    sendMessage();
+                }
+            });
+
+            setInterval(init, 100);
+        });
+    </script>
+
+</body>
 
 </html>
