@@ -56,13 +56,6 @@
             width: -moz-fit-content;
             width: fit-content;
         }
-
-        .message i {
-            font-style: italic;
-            font-size: 12px;
-            color: gray;
-            margin-right: 10px;
-        }
     </style>
 </head>
 
@@ -103,12 +96,23 @@
     function authInit() {
         auth = window.prompt("Enter Authentication Password for Control Panel: ");
 
-        if (auth === 'kkk0') {
-            canControl = true;
-        } else {
-            window.alert('Incorrect Authentication for Control Panel');
-            window.location.href = "https://digit.fifly.org";
-        }
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'checkAuthCorrect',
+                auth: auth,
+            }),
+        }).then(res => res.json()).then(data => {
+            if (data.correct) {
+                canControl = true;
+            } else {
+                window.alert('Incorrect Authentication for Control Panel');
+                window.location.href = "https://digit.fifly.org";
+            }
+        });
     }
 
     function clear() {

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Digit Admin Portal</title>
+    <title>Digit Manager Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
@@ -107,7 +107,7 @@
         let timestamp = new Date().toLocaleString();
 
         let payload = {
-            type: 'adminMessage',
+            type: 'managerMessage',
             auth: auth,
             message: {
                 username: username,
@@ -148,7 +148,7 @@
                 }
             case 'manager':
                 return {
-                    emoji: '👨‍💼',
+                    emoji: '💼',
                     title: 'Admin Manager',
                 }
             case 'verified-system':
