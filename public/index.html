@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+	<title>Digit</title>
+	<style>
+		html {
+			font-family: 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+			align-items: center;
+			background-color: rgb(51, 49, 49);
+			color: rgb(207, 205, 194);
+			text-align: center;
+		}
+
+		button {
+			height: 30px;
+			border: 1px solid black;
+			border-radius: 5px;
+			padding: 5px;
+			margin-left: 10px;
+		}
+
+		button a {
+			text-decoration: none;
+			color: rgb(80, 80, 80);
+		}
+	</style>
+</head>
+
+<body>
+	<h1>Digit</h1>
+	<p>You've landed on Planet Digit, the modern chatting app for the 21st century.</p>
+	<button id="chat-button">Chat App</button>
+	<button id="admin-button">Chat App (Admin)</button>
+	<button id="manager-button">Chat App (Manager)</button>
+	<button id="control-panel-button">Control Panel</button>
+</body>
+
+<script>
+	let modal = document.getElementById("modal");
+	let span = document.getElementsByClassName("close")[0];
+	let chatButton = document.getElementById("chat-button");
+	let adminButton = document.getElementById("admin-button");
+	let managerButton = document.getElementById("manager-button");
+	let controlPanelButton = document.getElementById("control-panel-button");
+
+	chatButton.addEventListener("click", () => {
+		window.location.href = "/app/";
+	});
+
+	adminButton.addEventListener("click", () => {
+		window.location.href = "/app/admin/";
+	});
+
+	managerButton.addEventListener("click", () => {
+		window.location.href = "/app/manager/";
+	});
+
+	controlPanelButton.addEventListener("click", () => {
+		window.location.href = "/control/";
+	});
+
+	span.addEventListener("click", () => {
+		modal.style.display = "none";
+	});
+
+	setInterval(() => {
+		fetch('/api', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				type: 'checkKilled',
+			}),
+		}).then(res => res.json()).then(data => {
+			if (data.killed) {
+				window.location.reload();
+			}
+		});
+	}, 100);
+</script>
+
+</html>

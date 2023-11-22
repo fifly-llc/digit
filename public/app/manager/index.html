@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Digit Manager Portal</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+	<style>
+		html {
+			font-family: 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+			background-color: rgb(51, 49, 49);
+			color: rgb(207, 205, 194);
+			overflow-x: hidden;
+		}
+
+		.send {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: fit-content;
+		}
+
+		input {
+			width: 300px;
+			height: 30px;
+			border: 1px solid black;
+			border-radius: 5px;
+			padding: 5px;
+			margin-right: 10px;
+			margin-bottom: 10px;
+		}
+
+		.message {
+			padding: 10px;
+			border: 1px solid black;
+			border-radius: 5px;
+			margin: 10px;
+			width: fit-content;
+		}
+
+		label,
+		.notice {
+			font-weight: bold;
+			font-size: 12px;
+			color: gray;
+			margin-bottom: 5px;
+			margin-left: 10px;
+			margin-right: 10px;
+			text-align: center;
+		}
+
+		.controls {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			height: fit-content;
+			width: 100vw;
+			gap: 10px;
+			margin-bottom: 10px;
+			padding: auto;
+		}
+
+		button {
+			height: 30px;
+			border: 1px solid black;
+			border-radius: 5px;
+			padding: 5px;
+			margin-left: 10px;
+		}
+
+		.message-controls {
+			border: none;
+			background-color: transparent;
+			cursor: pointer;
+			font-weight: bold;
+			margin-left: 5px;
+			margin-right: 5px;
+		}
+
+		svg {
+			width: 20px;
+			height: 20px;
+		}
+
+		.delete {
+			fill: rgb(184, 25, 25);
+		}
+
+		.edit {
+			fill: rgb(0, 45, 77);
+		}
+
+		.report {
+			fill: rgb(0, 45, 77);
+		}
+
+		.reports {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			height: fit-content;
+			width: 100vw;
+			gap: 10px;
+			margin-bottom: 10px;
+			padding: auto;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="controls">
+		<button id="clear">🧽 Clear All Messages 🧽</button>
+		<button id="lock"></button>
+	</div>
+	<div class="send">
+		<label for="username">Username: </label>
+		<input type="text" name="username" id="username">
+		<label for="message">Message: </label>
+		<input type="text" name="message" id="message">
+		<button id="send" disabled>Send</button>
+	</div>
+	<p id="notice" class="notice"></p>
+	<div class="reports"></div>
+	<div class="messages"></div>
+
+	<script>
+		let messageArray = [];
+		let reportArray = [];
+		let auth;
+		let canSendMessages = false;
+		const messages = document.querySelector('.messages');
+		const reports = document.querySelector('.reports');
+		const sendButton = document.getElementById('send');
+
+		function sendMessage() {
+			if (!canSendMessages) {
+				return;
+			}
+
+			const username = document.getElementById('username').value.trim();
+			const message = document.getElementById('message').value.trim();
+
+			if (!username || !message) {
+				return;
+			}
+
+			const timestamp = new Date().toLocaleString();
+
+			fetch('/api', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: 'managerMessage',
+					auth: auth,
+					message: {
+						username: username,
+						timestamp: timestamp,
+						content: message,
+					},
+				}),
+			});
+
+			document.getElementById('message').value = '';
+			init();
+		}
+
+		function getBadge(badge) {
+			const badgeInfo = {
+				'verified-bot': { emoji: '🤖', title: 'Verified Bot' },
+				'admin': { emoji: '🛠️', title: 'Admin' },
+				'verified': { emoji: '✅', title: 'Verified' },
+				'manager': { emoji: '💼', title: 'Admin Manager' },
+				'verified-system': { emoji: '⚙️', title: 'Verified System' },
+			};
+
+			return badgeInfo[badge] || '';
+		}
+
+		function renderMessages() {
+			messages.innerHTML = '';
+
+			messageArray.forEach(message => {
+				const username = message.username + message.badges.map(getBadge).map(({ emoji, title }) => ` <span title="${title}">${emoji}</span>`).join('');
+
+				const messageHTML = `<div class="message"><button class="message-controls delete" title="Delete Message" onclick="deleteMessage('${message.id}')"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16zM53.2 467a48 48 0 0 0 47.9 45h245.8a48 48 0 0 0 47.9-45L416 128H32z"/></svg></button><button class="message-controls edit" title="Edit Message" onclick="editMessage('${message.id}')"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 576 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M402.6 83.2l90.2 90.2c3.8 3.8 3.8 10 0 13.8L274.4 405.6l-92.8 10.3c-12.4 1.4-22.9-9.1-21.5-21.5l10.3-92.8L388.8 83.2c3.8-3.8 10-3.8 13.8 0zm162-22.9l-48.8-48.8c-15.2-15.2-39.9-15.2-55.2 0l-35.4 35.4c-3.8 3.8-3.8 10 0 13.8l90.2 90.2c3.8 3.8 10 3.8 13.8 0l35.4-35.4c15.2-15.3 15.2-40 0-55.2zM384 346.2V448H64V128h229.8c3.2 0 6.2-1.3 8.5-3.5l40-40c7.6-7.6 2.2-20.5-8.5-20.5H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V306.2c0-10.7-12.9-16-20.5-8.5l-40 40c-2.2 2.3-3.5 5.3-3.5 8.5z"/></svg></button><button title="Report Message" class="message-controls report" onclick="report('${message.id}', window.prompt('Enter Reason for reporting:'))"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M64 32C64 14.3 49.7 0 32 0S0 14.3 0 32V64 368 480c0 17.7 14.3 32 32 32s32-14.3 32-32V352l64.3-16.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30V66.1c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L64 48V32z"/></svg></button><i>${message.timestamp}</i> <b>${username}</b>: ${message.content}</div>`;
+				messages.innerHTML = messageHTML + messages.innerHTML;
+			});
+		}
+
+		function renderMessage(message) {
+			const username = message.username + message.badges.map(getBadge).map(({ emoji, title }) => ` <span title="${title}">${emoji}</span>`).join('');
+
+			return `<div class="message"><i>${message.timestamp}</i> <b>${username}</b>: ${message.content}</div>`;
+		}
+
+		function renderMessageWithoutDiv(message) {
+			const username = message.username + message.badges.map(getBadge).map(({ emoji, title }) => ` <span title="${title}">${emoji}</span>`).join('');
+
+			return `<i>${message.timestamp}</i> <b>${username}</b>: ${message.content}`;
+		}
+
+		function renderReports() {
+			reports.innerHTML = '';
+
+			reportArray.forEach(report => {
+				const reportHTML = `<div class="message"><button class="message-controls delete" title="Delete Message" onclick="deleteMessage('${report.id}')"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16zM53.2 467a48 48 0 0 0 47.9 45h245.8a48 48 0 0 0 47.9-45L416 128H32z"/></svg></button><button class="message-controls edit" title="Edit Message" onclick="editMessage('${report.id}')"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 576 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M402.6 83.2l90.2 90.2c3.8 3.8 3.8 10 0 13.8L274.4 405.6l-92.8 10.3c-12.4 1.4-22.9-9.1-21.5-21.5l10.3-92.8L388.8 83.2c3.8-3.8 10-3.8 13.8 0zm162-22.9l-48.8-48.8c-15.2-15.2-39.9-15.2-55.2 0l-35.4 35.4c-3.8 3.8-3.8 10 0 13.8l90.2 90.2c3.8 3.8 10 3.8 13.8 0l35.4-35.4c15.2-15.3 15.2-40 0-55.2zM384 346.2V448H64V128h229.8c3.2 0 6.2-1.3 8.5-3.5l40-40c7.6-7.6 2.2-20.5-8.5-20.5H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V306.2c0-10.7-12.9-16-20.5-8.5l-40 40c-2.2 2.3-3.5 5.3-3.5 8.5z"/></svg></button><b>REPORT</b>: ${report.reason} - ${renderMessageWithoutDiv(report.message)}</div>`;
+				reports.innerHTML = reportHTML + reports.innerHTML;
+			});
+		}
+
+		function report(id, reason) {
+			fetch('/api', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: 'postReport',
+					id: id,
+					reason: reason,
+				})
+			});
+		}
+
+		function deleteMessage(id) {
+			fetch('/api', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: 'deleteMessage',
+					id: id,
+					auth: auth,
+				}),
+			});
+		}
+
+		function editMessage(id) {
+			let content = window.prompt('Enter new message:');
+			if (!content || !content.trim() || content.trim().length === 0) {
+				return;
+			}
+
+			fetch('/api', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: 'editMessage',
+					id: id,
+					auth: auth,
+					content: content,
+				}),
+			});
+		}
+
+		function init() {
+			fetch('/api', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: 'checkKilled',
+				}),
+			})
+				.then(res => res.json())
+				.then(data => {
+					if (data.killed) {
+						window.location.reload();
+					}
+				});
+
+			fetch('/api', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: 'getMessages',
+				}),
+			})
+				.then(res => res.json())
+				.then(data => {
+					if (JSON.stringify(messageArray) === JSON.stringify(data.messages)) {
+						return;
+					}
+
+					messageArray = data.messages;
+					renderMessages();
+				});
+
+			fetch('/api', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: 'getMessage',
+				}),
+			})
+				.then(res => res.json())
+				.then(data => {
+					document.getElementById('notice').innerHTML = data.message;
+				});
+
+			fetch('/api', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: 'checkLocked',
+				}),
+			}).then(res => {
+				return res.json();
+			}).then(data => {
+				if (data.locked) {
+					document.getElementById('lock').innerHTML = '🔓 Unlock New Messages 🔓';
+					document.getElementById('lock').style.backgroundColor = 'green';
+				} else {
+					document.getElementById('lock').innerHTML = '🔒 Lock New Messages (Except Admin & Bot) 🔒';
+					document.getElementById('lock').style.backgroundColor = 'red';
+				}
+			});
+
+			fetch('/api', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: 'getReports',
+					auth: auth
+				}),
+			})
+				.then(res => res.json())
+				.then(data => {
+					if (JSON.stringify(reportArray) === JSON.stringify(data.reports)) {
+						return;
+					}
+
+					reportArray = data.reports;
+					renderReports();
+				});
+		}
+
+		function authInit() {
+			auth = window.prompt("Enter Authentication Password for Admin Portal: ");
+
+			fetch('/api', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: 'checkManagerAuthCorrect',
+					auth: auth,
+				}),
+			})
+				.then(res => res.json())
+				.then(data => {
+					if (data.correct) {
+						canSendMessages = true;
+						sendButton.disabled = false;
+					} else {
+						window.alert('Incorrect Authentication for Admin Portal');
+						window.location.href = "https://digit.fifly.org";
+					}
+				});
+		}
+
+		function clear() {
+			if (!canSendMessages) {
+				return;
+			}
+
+			fetch('/api', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: 'clear',
+					auth: auth,
+				}),
+			});
+		}
+
+		function lock() {
+			if (!canSendMessages) {
+				return;
+			}
+
+			fetch('/api', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					type: 'lock',
+					auth: auth,
+				}),
+			});
+		}
+
+		document.addEventListener('DOMContentLoaded', () => {
+			authInit();
+
+			document.getElementById('send').addEventListener('click', () => {
+				sendMessage();
+			});
+
+			document.getElementById('clear').addEventListener('click', () => {
+				clear();
+			});
+
+			document.getElementById('lock').addEventListener('click', () => {
+				lock();
+			});
+
+			document.addEventListener('keypress', (ev) => {
+				if (ev.key == "Enter") {
+					sendMessage();
+				}
+			});
+
+			setInterval(init, 100);
+		});
+	</script>
+
+</body>
+
+</html>
