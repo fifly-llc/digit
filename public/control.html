@@ -239,14 +239,31 @@
 
 				document.getElementById('backup-view-header').style.display = 'block';
 
-				messages.innerHTML = '';
-
-				messageArray.forEach(message => {
-					let msg = message.content;
-					let messg = `<div class="message"><i>${message.timestamp}</i> <b>${message.username}</b>: ${msg}</div>`;
-					messages.innerHTML = messg + messages.innerHTML;
-				});
+				renderMessages();
 			});
+	}
+
+	function getBadge(badge) {
+		const badgeInfo = {
+			'verified-bot': { emoji: '🤖', title: 'Verified Bot' },
+			'admin': { emoji: '🛠️', title: 'Admin' },
+			'verified': { emoji: '✅', title: 'Verified' },
+			'verified-system': { emoji: '⚙️', title: 'Verified System' },
+			'important': { emoji: '⚠️', title: 'Important' },
+		};
+
+		return badgeInfo[badge] || '';
+	}
+
+	function renderMessages() {
+		messages.innerHTML = '';
+
+		messageArray.forEach(message => {
+			const username = message.username + message.badges.map(getBadge).map(({ emoji, title }) => ` <span title="${title}">${emoji}</span>`).join('');
+
+			const messageHTML = `<div class="message"><i>${message.timestamp}</i> <b>${username}</b>: ${message.content}</div>`;
+			messages.innerHTML = messageHTML + messages.innerHTML;
+		});
 	}
 
 	setInterval(init, 100);

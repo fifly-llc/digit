@@ -64,14 +64,8 @@ class Channel {
 		this.reports = this.reports.filter((report) => report.id !== id);
 	}
 
-	genId() {
-		let id = generateRandom(20);
-
-		if (this.messageIds.includes(id)) {
-			return this.genId();
-		} else {
-			return id;
-		}
+	ignoreReport(id) {
+		this.reports = this.reports.filter((report) => report.id !== id);
 	}
 
 	lock() {

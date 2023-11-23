@@ -2,25 +2,32 @@ const express = require('express');
 const fs = require('fs');
 const Filter = require('./filter');
 const Channel = require('./channel');
+const Thread = require('./thread');
 const { genRandom, stripHTML, stripEmojis } = require('./utils');
 
 const app = express();
 const port = 3000;
 
 let channel = new Channel();
+let threads = [];
 let ids = [];
 
 let killed = false;
 
-const adminAuth = '6669', managerAuth = 'kkk0', controlAuth = 'kkk0';
+const adminAuth = '6669', controlAuth = 'kkk0';
 
 console.log('[NOTICE] Admin Authentication is <' + adminAuth + '>.');
-console.log('[NOTICE] Manager Authentication is <' + managerAuth + '>.');
 console.log('[NOTICE] Control Authentication is <' + controlAuth + '>.');
 
 function filter(text) {
 	const filter = new Filter();
-	return filter.clean(stripHTML(text));
+	return filter.clean(addTags(stripHTML(text)));
+}
+
+function addTags(text) {
+	return text.replace(/#([a-zA-Z0-9_]+)/g, (match, p1) => {
+		return `<a href="/thread?id=${p1}" class="thread-link">#${p1}</a>`;
+	});
 }
 
 function blockPage() {
@@ -47,7 +54,7 @@ function readFileAndSend(res, filePath) {
 }
 
 function readControlPageAndSend(res) {
-	fs.readFile('./public/control/index.html', 'utf8', (error, data) => {
+	fs.readFile('./public/control.html', 'utf8', (error, data) => {
 		if (error) {
 			console.error('Error reading file:', error);
 			res.status(500).send('Internal Server Error');
@@ -62,15 +69,15 @@ app.get('/', (req, res) => {
 });
 
 app.get('/app', (req, res) => {
-	readFileAndSend(res, './public/app/index.html');
+	readFileAndSend(res, './public/app.html');
 });
 
 app.get('/app/admin', (req, res) => {
-	readFileAndSend(res, './public/app/admin/index.html');
+	readFileAndSend(res, './public/app.admin.html');
 });
 
-app.get('/app/manager', (req, res) => {
-	readFileAndSend(res, './public/app/manager/index.html');
+app.get('/thread', (req, res) => {
+	readFileAndSend(res, './public/thread.html');
 });
 
 app.get('/control', (req, res) => {
@@ -96,9 +103,6 @@ app.post('/api', (req, res) => {
 		case 'adminMessage':
 			handleAdminMessage(body, req, res);
 			break;
-		case 'managerMessage':
-			handleManagerMessage(body, req, res);
-			break;
 		case 'clear':
 			handleClear(body, res);
 			break;
@@ -123,41 +127,67 @@ app.post('/api', (req, res) => {
 		case 'checkAdminAuthCorrect':
 			res.send({ correct: adminAuth === body.auth });
 			break;
-		case 'checkManagerAuthCorrect':
-			res.send({ correct: managerAuth === body.auth });
-			break;
 		case 'checkControlAuthCorrect':
 			res.send({ correct: controlAuth === body.auth });
 			break;
 		case 'deleteMessage':
-			if (body.auth !== managerAuth && body.auth !== controlAuth) {
+			if (body.auth !== adminAuth) {
 				res.sendStatus(401);
 				return;
 			}
 
 			channel.deleteMessageFromId(body.id);
+			res.sendStatus(200);
 			break;
 		case 'editMessage':
-			if (body.auth !== managerAuth && body.auth !== controlAuth) {
+			if (body.auth !== adminAuth) {
 				res.sendStatus(401);
 				return;
 			}
 
-			channel.editMessageFromId(body.id, body.content);
+			channel.editMessageFromId(body.id, addTags(body.content));
+			res.sendStatus(200);
 			break;
 		case 'getMessageFromId':
 			res.send({ message: channel.getMessageFromId(body.id) });
 			break;
 		case 'postReport':
 			channel.postReport(body.id, body.reason);
+			res.sendStatus(200);
 			break;
 		case 'getReports':
-			if (body.auth !== managerAuth && body.auth !== controlAuth) {
+			if (body.auth !== adminAuth) {
 				res.sendStatus(401);
 				return;
 			}
 
 			res.send({ reports: channel.getReports() });
+			break;
+		case 'getThreadMessages':
+			let thread = threads.find(thread => thread.id === body.id);
+
+			if (thread) {
+				res.send({ messages: thread.getMessages() });
+			} else {
+				res.sendStatus(400);
+			}
+
+			break;
+		case 'postThreadMessage':
+			handleThreadMessage(body, req, res);
+			break;
+		case 'createThread':
+			threads.push(new Thread(body.id));
+			res.sendStatus(200);
+			break;
+		case 'ignoreReport':
+			if (body.auth !== adminAuth) {
+				res.sendStatus(401);
+				return;
+			}
+
+			channel.ignoreReport(body.id);
+			res.sendStatus(200);
 			break;
 		default:
 			res.sendStatus(400);
@@ -186,6 +216,19 @@ function handlePostMessage(body, req, res) {
 		content: filter(body.message.content),
 		id: generateId(),
 		badges: []
+	});
+
+	res.sendStatus(200);
+}
+
+function handleThreadMessage(body, req, res) {
+	let sanitizedUsername = sanitizeUsername(body.message.username);
+
+	threads.find(thread => thread.id === body.id).postMessage({
+		username: filter(sanitizedUsername),
+		timestamp: filter(body.message.timestamp),
+		content: filter(body.message.content),
+		id: generateId()
 	});
 
 	res.sendStatus(200);
@@ -223,6 +266,7 @@ function handleSystemMessage(body, res) {
 		badges: [
 			'verified-system',
 			'admin',
+			'important',
 		]
 	});
 
@@ -240,26 +284,11 @@ function handleAdminMessage(body, req, res) {
 		badges: [
 			'verified',
 			'admin',
+			'important',
 		]
 	});
 
 	res.sendStatus(200);
-}
-
-function handleManagerMessage(body, req, res) {
-	let sanitizedUsername = sanitizeUsername(body.message.username);
-
-	channel.postMessage({
-		content: filter(body.message.content),
-		username: filter(sanitizedUsername),
-		timestamp: body.message.timestamp,
-		id: generateId(),
-		badges: [
-			'verified',
-			'admin',
-			'manager'
-		]
-	});
 }
 
 function handleClear(body, res) {

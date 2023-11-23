@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Digit Admin Portal</title>
+	<title>Digit</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
@@ -39,11 +39,6 @@
 			border-radius: 5px;
 			padding: 5px;
 			margin-left: 10px;
-			align-self: center;
-		}
-
-		button .send {
-			align-self: normal;
 		}
 
 		.message {
@@ -82,6 +77,13 @@
 		.report {
 			fill: rgb(0, 45, 77);
 		}
+
+		.thread-link {
+			text-decoration: none;
+			color: rgb(43, 204, 135);
+			font-weight: bold;
+			cursor: pointer;
+		}
 	</style>
 </head>
 
@@ -91,23 +93,16 @@
 		<input type="text" name="username" id="username">
 		<label for="message">Message: </label>
 		<input type="text" name="message" id="message">
-		<button id="send" disabled>Send</button>
+		<button id="send">Send</button>
 	</div>
-	<p id="notice" class="notice"></p>
+	<p class="notice" id="notice"></p>
 	<div class="messages"></div>
 
 	<script>
 		let messageArray = [];
-		let auth;
-		let canSendMessages = false;
 		const messages = document.querySelector('.messages');
-		const sendButton = document.getElementById('send');
 
 		function sendMessage() {
-			if (!canSendMessages) {
-				return;
-			}
-
 			const username = document.getElementById('username').value.trim();
 			const message = document.getElementById('message').value.trim();
 
@@ -115,24 +110,19 @@
 				return;
 			}
 
-			const timestamp = new Date().toLocaleString();
-
-			const payload = {
-				type: 'adminMessage',
-				auth: auth,
-				message: {
-					username: username,
-					timestamp: timestamp,
-					content: message,
-				},
-			};
-
 			fetch('/api', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify(payload),
+				body: JSON.stringify({
+					type: 'postMessage',
+					message: {
+						username,
+						timestamp: new Date().toLocaleString(),
+						content: message,
+					},
+				}),
 			});
 
 			document.getElementById('message').value = '';
@@ -144,8 +134,8 @@
 				'verified-bot': { emoji: '🤖', title: 'Verified Bot' },
 				'admin': { emoji: '🛠️', title: 'Admin' },
 				'verified': { emoji: '✅', title: 'Verified' },
-				'manager': { emoji: '💼', title: 'Admin Manager' },
 				'verified-system': { emoji: '⚙️', title: 'Verified System' },
+				'important': { emoji: '⚠️', title: 'Important' },
 			};
 
 			return badgeInfo[badge] || '';
@@ -159,20 +149,6 @@
 
 				const messageHTML = `<div class="message"><button title="Report Message" class="message-controls report" onclick="report('${message.id}', window.prompt('Enter Reason for reporting:'))"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M64 32C64 14.3 49.7 0 32 0S0 14.3 0 32V64 368 480c0 17.7 14.3 32 32 32s32-14.3 32-32V352l64.3-16.1c41.1-10.3 84.6-5.5 122.5 13.4c44.2 22.1 95.5 24.8 141.7 7.4l34.7-13c12.5-4.7 20.8-16.6 20.8-30V66.1c0-23-24.2-38-44.8-27.7l-9.6 4.8c-46.3 23.2-100.8 23.2-147.1 0c-35.1-17.6-75.4-22-113.5-12.5L64 48V32z"/></svg></button><i>${message.timestamp}</i> <b>${username}</b>: ${message.content}</div>`;
 				messages.innerHTML = messageHTML + messages.innerHTML;
-			});
-		}
-
-		function report(id, reason) {
-			fetch('/api', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					type: 'postReport',
-					id: id,
-					reason: reason,
-				})
 			});
 		}
 
@@ -227,33 +203,22 @@
 				});
 		}
 
-		function authInit() {
-			auth = window.prompt("Enter Authentication Password for Admin Portal: ");
-
+		function report(id, reason) {
 			fetch('/api', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					type: 'checkAdminAuthCorrect',
-					auth: auth,
-				}),
-			})
-				.then(res => res.json())
-				.then(data => {
-					if (data.correct) {
-						canSendMessages = true;
-						sendButton.disabled = false;
-					} else {
-						window.alert('Incorrect Authentication for Admin Portal');
-						window.location.href = "https://digit.fifly.org";
-					}
-				});
+					type: 'postReport',
+					id: id,
+					reason: reason,
+				})
+			});
 		}
 
 		document.addEventListener('DOMContentLoaded', () => {
-			authInit();
+			init();
 
 			document.getElementById('send').addEventListener('click', () => {
 				sendMessage();
@@ -268,7 +233,6 @@
 			setInterval(init, 100);
 		});
 	</script>
-
 </body>
 
 </html>

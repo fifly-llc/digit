@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digit Thread</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <style>
+        html {
+            font-family: 'Poppins', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: rgb(51, 49, 49);
+            color: rgb(207, 205, 194);
+            overflow-x: hidden;
+        }
+
+        .send {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: fit-content;
+        }
+
+        input {
+            width: 300px;
+            height: 30px;
+            border: 1px solid black;
+            border-radius: 5px;
+            padding: 5px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            height: 30px;
+            border: 1px solid black;
+            border-radius: 5px;
+            padding: 5px;
+            margin-left: 10px;
+        }
+
+        .message {
+            padding: 10px;
+            border: 1px solid black;
+            border-radius: 5px;
+            margin: 10px;
+            width: fit-content;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 12px;
+            color: gray;
+            margin-bottom: 5px;
+            margin-left: 10px;
+            margin-right: 10px;
+            text-align: center;
+        }
+
+        .thread-link {
+			text-decoration: none;
+			color: rgb(43, 204, 135);
+			font-weight: bold;
+			cursor: pointer;
+		}
+    </style>
+</head>
+
+<body>
+    <div class="send">
+        <label for="username">Username: </label>
+        <input type="text" name="username" id="username">
+        <label for="message">Message: </label>
+        <input type="text" name="message" id="message">
+        <button id="send">Send</button>
+    </div>
+    <div class="messages"></div>
+
+    <script>
+        let messageArray = [];
+        const messages = document.querySelector('.messages');
+        const id = new URLSearchParams(window.location.search).get('id');
+
+        fetch('/api', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type: 'doesThreadExist',
+                id: id,
+            }),
+        }).then(res => res.json()).then(data => {
+            if (!data.exists) {
+                window.location.href = '/';
+            }
+        });
+
+        function sendMessage() {
+            const username = document.getElementById('username').value.trim();
+            const message = document.getElementById('message').value.trim();
+
+            if (!username || !message) {
+                return;
+            }
+
+            fetch('/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'postThreadMessage',
+                    id: id,
+                    message: {
+                        username,
+                        timestamp: new Date().toLocaleString(),
+                        content: message,
+                    },
+                }),
+            });
+
+            document.getElementById('message').value = '';
+            init();
+        }
+
+        function renderMessages() {
+            messages.innerHTML = '';
+
+            messageArray.forEach(message => {
+                const messageHTML = `<div class="message"><i>${message.timestamp}</i> <b>${message.username}</b>: ${message.content}</div>`;
+                messages.innerHTML = messageHTML + messages.innerHTML;
+            });
+        }
+
+        function init() {
+            fetch('/api', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'getThreadMessages',
+                    id: id,
+                }),
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (JSON.stringify(messageArray) === JSON.stringify(data.messages)) {
+                        return;
+                    }
+
+                    messageArray = data.messages;
+                    renderMessages();
+                });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+
+            document.getElementById('send').addEventListener('click', () => {
+                sendMessage();
+            });
+
+            document.addEventListener('keypress', (ev) => {
+                if (ev.key == "Enter") {
+                    sendMessage();
+                }
+            });
+
+            setInterval(init, 100);
+        });
+    </script>
+</body>
+
+</html>

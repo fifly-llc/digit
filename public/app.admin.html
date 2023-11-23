@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Digit Manager Portal</title>
+	<title>Digit Admin Portal</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 	<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
@@ -98,6 +98,10 @@
 			fill: rgb(0, 45, 77);
 		}
 
+		.ignore {
+			fill: rgb(184, 25, 25);
+		}
+
 		.reports {
 			display: flex;
 			flex-direction: column;
@@ -108,6 +112,13 @@
 			gap: 10px;
 			margin-bottom: 10px;
 			padding: auto;
+		}
+
+		.thread-link {
+			text-decoration: none;
+			color: rgb(43, 204, 135);
+			font-weight: bold;
+			cursor: pointer;
 		}
 	</style>
 </head>
@@ -131,6 +142,7 @@
 	<script>
 		let messageArray = [];
 		let reportArray = [];
+		let ignoredIds = [];
 		let auth;
 		let canSendMessages = false;
 		const messages = document.querySelector('.messages');
@@ -157,7 +169,7 @@
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					type: 'managerMessage',
+					type: 'adminMessage',
 					auth: auth,
 					message: {
 						username: username,
@@ -176,8 +188,8 @@
 				'verified-bot': { emoji: '🤖', title: 'Verified Bot' },
 				'admin': { emoji: '🛠️', title: 'Admin' },
 				'verified': { emoji: '✅', title: 'Verified' },
-				'manager': { emoji: '💼', title: 'Admin Manager' },
 				'verified-system': { emoji: '⚙️', title: 'Verified System' },
+				'important': { emoji: '⚠️', title: 'Important' },
 			};
 
 			return badgeInfo[badge] || '';
@@ -210,9 +222,18 @@
 			reports.innerHTML = '';
 
 			reportArray.forEach(report => {
-				const reportHTML = `<div class="message"><button class="message-controls delete" title="Delete Message" onclick="deleteMessage('${report.id}')"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16zM53.2 467a48 48 0 0 0 47.9 45h245.8a48 48 0 0 0 47.9-45L416 128H32z"/></svg></button><button class="message-controls edit" title="Edit Message" onclick="editMessage('${report.id}')"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 576 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M402.6 83.2l90.2 90.2c3.8 3.8 3.8 10 0 13.8L274.4 405.6l-92.8 10.3c-12.4 1.4-22.9-9.1-21.5-21.5l10.3-92.8L388.8 83.2c3.8-3.8 10-3.8 13.8 0zm162-22.9l-48.8-48.8c-15.2-15.2-39.9-15.2-55.2 0l-35.4 35.4c-3.8 3.8-3.8 10 0 13.8l90.2 90.2c3.8 3.8 10 3.8 13.8 0l35.4-35.4c15.2-15.3 15.2-40 0-55.2zM384 346.2V448H64V128h229.8c3.2 0 6.2-1.3 8.5-3.5l40-40c7.6-7.6 2.2-20.5-8.5-20.5H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V306.2c0-10.7-12.9-16-20.5-8.5l-40 40c-2.2 2.3-3.5 5.3-3.5 8.5z"/></svg></button><b>REPORT</b>: ${report.reason} - ${renderMessageWithoutDiv(report.message)}</div>`;
+				if(ignoredIds.includes(report.id)) {
+					return;
+				}
+
+				const reportHTML = `<div class="message"><button class="message-controls delete" title="Delete Message" onclick="deleteMessage('${report.id}')"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M432 32H312l-9.4-18.7A24 24 0 0 0 281.1 0H166.8a23.72 23.72 0 0 0-21.4 13.3L136 32H16A16 16 0 0 0 0 48v32a16 16 0 0 0 16 16h416a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16zM53.2 467a48 48 0 0 0 47.9 45h245.8a48 48 0 0 0 47.9-45L416 128H32z"/></svg></button><button class="message-controls edit" title="Edit Message" onclick="editMessage('${report.id}')"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 576 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M402.6 83.2l90.2 90.2c3.8 3.8 3.8 10 0 13.8L274.4 405.6l-92.8 10.3c-12.4 1.4-22.9-9.1-21.5-21.5l10.3-92.8L388.8 83.2c3.8-3.8 10-3.8 13.8 0zm162-22.9l-48.8-48.8c-15.2-15.2-39.9-15.2-55.2 0l-35.4 35.4c-3.8 3.8-3.8 10 0 13.8l90.2 90.2c3.8 3.8 10 3.8 13.8 0l35.4-35.4c15.2-15.3 15.2-40 0-55.2zM384 346.2V448H64V128h229.8c3.2 0 6.2-1.3 8.5-3.5l40-40c7.6-7.6 2.2-20.5-8.5-20.5H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h352c26.5 0 48-21.5 48-48V306.2c0-10.7-12.9-16-20.5-8.5l-40 40c-2.2 2.3-3.5 5.3-3.5 8.5z"/></svg></button><button class="message-controls ignore" onclick="ignore('${report.id}')"><svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M256 8C119.034 8 8 119.033 8 256s111.034 248 248 248 248-111.034 248-248S392.967 8 256 8zm130.108 117.892c65.448 65.448 70 165.481 20.677 235.637L150.47 105.216c70.204-49.356 170.226-44.735 235.638 20.676zM125.892 386.108c-65.448-65.448-70-165.481-20.677-235.637L361.53 406.784c-70.203 49.356-170.226 44.736-235.638-20.676z"/></svg></button><b>REPORT</b>: ${report.reason} - ${renderMessageWithoutDiv(report.message)}</div>`;
 				reports.innerHTML = reportHTML + reports.innerHTML;
 			});
+		}
+
+		function ignore(id) {
+			console.log('ignoring ', id);
+			ignoredIds.push(id);
 		}
 
 		function report(id, reason) {
@@ -363,7 +384,7 @@
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					type: 'checkManagerAuthCorrect',
+					type: 'checkAdminAuthCorrect',
 					auth: auth,
 				}),
 			})
@@ -374,7 +395,7 @@
 						sendButton.disabled = false;
 					} else {
 						window.alert('Incorrect Authentication for Admin Portal');
-						window.location.href = "https://digit.fifly.org";
+						window.location.href = '/';
 					}
 				});
 		}

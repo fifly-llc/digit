@@ -37,17 +37,17 @@
 	<p>You've landed on Planet Digit, the modern chatting app for the 21st century.</p>
 	<button id="chat-button">Chat App</button>
 	<button id="admin-button">Chat App (Admin)</button>
-	<button id="manager-button">Chat App (Manager)</button>
 	<button id="control-panel-button">Control Panel</button>
+	<button id="create-thread">Create Thread</button>
+	<button id="join-thread">Join Thread</button>
 </body>
 
 <script>
-	let modal = document.getElementById("modal");
-	let span = document.getElementsByClassName("close")[0];
 	let chatButton = document.getElementById("chat-button");
 	let adminButton = document.getElementById("admin-button");
-	let managerButton = document.getElementById("manager-button");
 	let controlPanelButton = document.getElementById("control-panel-button");
+	let createThreadButton = document.getElementById("create-thread");
+	let joinThreadButton = document.getElementById("join-thread");
 
 	chatButton.addEventListener("click", () => {
 		window.location.href = "/app/";
@@ -57,17 +57,33 @@
 		window.location.href = "/app/admin/";
 	});
 
-	managerButton.addEventListener("click", () => {
-		window.location.href = "/app/manager/";
-	});
-
 	controlPanelButton.addEventListener("click", () => {
 		window.location.href = "/control/";
 	});
 
-	span.addEventListener("click", () => {
-		modal.style.display = "none";
+	createThreadButton.addEventListener("click", () => {
+		createThread(window.prompt("Enter Thread ID to create:"));
 	});
+
+	joinThreadButton.addEventListener("click", () => {
+		window.location.href = "/thread?id=" + window.prompt("Enter Thread ID:");
+	});
+
+	function createThread(id) {
+		console.log('creating thread: ' + id);
+		fetch('/api', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+				type: 'createThread',
+				id: id,
+			}),
+		}).then(() => {
+			window.location.href = "/thread?id=" + id;
+		});
+	}
 
 	setInterval(() => {
 		fetch('/api', {
