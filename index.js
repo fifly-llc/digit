@@ -14,7 +14,7 @@ let ids = [];
 
 let killed = false;
 
-const adminAuth = '6669', controlAuth = 'kkk0';
+const adminAuth = 'qw12', controlAuth = 'kkk0';
 
 console.log('[NOTICE] Admin Authentication is <' + adminAuth + '>.');
 console.log('[NOTICE] Control Authentication is <' + controlAuth + '>.');
@@ -292,7 +292,7 @@ function handleAdminMessage(body, req, res) {
 }
 
 function handleClear(body, res) {
-	if (body.auth !== managerAuth && body.auth !== controlAuth) {
+	if (body.auth !== adminAuth && body.auth !== controlAuth) {
 		res.sendStatus(401);
 		return;
 	}
@@ -302,7 +302,7 @@ function handleClear(body, res) {
 }
 
 function handleLock(body, res) {
-	if (body.auth !== managerAuth && body.auth !== controlAuth) {
+	if (body.auth !== adminAuth && body.auth !== controlAuth) {
 		res.sendStatus(401);
 		return;
 	}
@@ -313,7 +313,7 @@ function handleLock(body, res) {
 }
 
 function handleKill(body, res) {
-	if (body.auth !== managerAuth && body.auth !== controlAuth) {
+	if (body.auth !== adminAuth && body.auth !== controlAuth) {
 		res.sendStatus(401);
 		return;
 	}
@@ -330,7 +330,7 @@ function handleKill(body, res) {
 }
 
 function handleGetBackup(body, res) {
-	if (body.auth !== managerAuth && body.auth !== controlAuth) {
+	if (body.auth !== controlAuth) {
 		res.sendStatus(401);
 		return;
 	}

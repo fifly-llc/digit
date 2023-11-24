@@ -62,15 +62,25 @@
 	});
 
 	createThreadButton.addEventListener("click", () => {
-		createThread(window.prompt("Enter Thread ID to create:"));
+		createThread(window.prompt("Enter Thread ID to create (letters and numbers only):"));
 	});
 
 	joinThreadButton.addEventListener("click", () => {
-		window.location.href = "/thread?id=" + window.prompt("Enter Thread ID:");
+		let id = window.prompt("Enter Thread ID to join (letters and numbers only):");
+
+		if (!id) {
+			return;
+		}
+
+		window.location.href = `/thread?id=${id}`;
 	});
 
 	function createThread(id) {
-		console.log('creating thread: ' + id);
+		if (!id.match(/^[a-zA-Z0-9]+$/)) {
+			window.alert("Invalid Thread ID. Thread IDs can only contain letters and numbers.");
+			return;
+		}
+
 		fetch('/api', {
 			method: 'POST',
 			headers: {
