@@ -1,5 +1,4 @@
 const express = require('express');
-const fs = require('fs');
 const Filter = require('./filter');
 const Channel = require('./channel');
 const Thread = require('./thread');
