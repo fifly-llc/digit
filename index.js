@@ -36,6 +36,26 @@ function updateJSON() {
 	fs.writeFileSync(dataPath, JSON.stringify(json, null, 4));
 }
 
+function initJSON() {
+	json = {
+		channel: {
+			messages: {
+				messageArray: [],
+				messageBackup: [],
+			},
+			reports: [],
+			lock: {
+				locked: false,
+				lockMessage: "Thread is 🔓 Unlocked 🔓",
+			}
+		},
+		threads: [],
+		ids: [],
+	};
+
+	fs.writeFileSync(dataPath, JSON.stringify(json, null, 4));
+}
+
 function readJSON() {
 	try {
 		json = JSON.parse(fs.readFileSync(dataPath));
@@ -339,6 +359,10 @@ function sanitizeUsername(username) {
 
 app.listen(port, () => {
 	console.log(`Listening on port ${port}`);
+
+	if(!fs.existsSync(dataPath)) {
+		initJSON();
+	}
 
 	readJSON();
 
