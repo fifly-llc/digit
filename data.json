@@ -1,0 +1,61 @@
+{
+    "channel": {
+        "messages": {
+            "messageArray": [
+                {
+                    "username": "proplayer919",
+                    "timestamp": "26/11/2023, 12:08:58 pm",
+                    "content": "hi",
+                    "id": "tV7piyTqu0IiN50WM1phFpH2Bz6h4mBoLBiJbkZ5UiivJxD1gj9BnJZXCxlZ930d9I9UQC",
+                    "badges": []
+                },
+                {
+                    "username": "proplayer919",
+                    "timestamp": "26/11/2023, 12:09:33 pm",
+                    "content": "hello!",
+                    "id": "PbZS6egtwUxL3uQYlz2FezTMCfOjIUS8mhv1IRKdyNrB3zkAm6wc4ag88sdJh3fBxmlPoE",
+                    "badges": []
+                }
+            ],
+            "messageBackup": [
+                {
+                    "username": "proplayer919",
+                    "timestamp": "26/11/2023, 12:08:58 pm",
+                    "content": "hi",
+                    "id": "tV7piyTqu0IiN50WM1phFpH2Bz6h4mBoLBiJbkZ5UiivJxD1gj9BnJZXCxlZ930d9I9UQC",
+                    "badges": []
+                },
+                {
+                    "username": "proplayer919",
+                    "timestamp": "26/11/2023, 12:09:33 pm",
+                    "content": "hello!",
+                    "id": "PbZS6egtwUxL3uQYlz2FezTMCfOjIUS8mhv1IRKdyNrB3zkAm6wc4ag88sdJh3fBxmlPoE",
+                    "badges": []
+                }
+            ]
+        },
+        "reports": [],
+        "lock": {
+            "locked": false,
+            "lockMessage": "Thread is 🔓 Unlocked 🔓"
+        }
+    },
+    "threads": [
+        {
+            "id": "h",
+            "messages": [
+                {
+                    "username": "h",
+                    "timestamp": "26/11/2023, 12:12:42 pm",
+                    "content": "hello!",
+                    "id": "Xbz7snVxEbGsZJuwkIorbyas12q06SSuomzjLNVWfynNCXEjSpaTWDslX4eHjO1TsOMRK1"
+                }
+            ]
+        }
+    ],
+    "ids": [
+        "tV7piyTqu0IiN50WM1phFpH2Bz6h4mBoLBiJbkZ5UiivJxD1gj9BnJZXCxlZ930d9I9UQC",
+        "PbZS6egtwUxL3uQYlz2FezTMCfOjIUS8mhv1IRKdyNrB3zkAm6wc4ag88sdJh3fBxmlPoE",
+        "Xbz7snVxEbGsZJuwkIorbyas12q06SSuomzjLNVWfynNCXEjSpaTWDslX4eHjO1TsOMRK1"
+    ]
+}

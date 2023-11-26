@@ -1,8 +1,10 @@
 const express = require('express');
+const fs = require('fs');
 const Filter = require('./filter');
 const Channel = require('./channel');
 const Thread = require('./thread');
 const { genRandom, stripHTML, stripEmojis } = require('./utils');
+require('dotenv').config();
 
 const app = express();
 const port = 3000;
@@ -11,12 +13,34 @@ let channel = new Channel();
 let threads = [];
 let ids = [];
 
+let json = {};
+
 let killed = false;
 
 const adminAuth = 'qw12', controlAuth = 'kkk0';
 
+dataPath = process.env.DATA_PATH;
+
 console.log('[NOTICE] Admin Authentication is <' + adminAuth + '>.');
 console.log('[NOTICE] Control Authentication is <' + controlAuth + '>.');
+
+function updateJSON() {
+	json = {
+		channel: channel.toJSON(),
+		threads: threads.map((thread) => {
+			return thread.toJSON();
+		}),
+		ids: ids,
+	};
+
+	fs.writeFileSync(dataPath, JSON.stringify(json, null, 4));
+}
+
+function readJSON() {
+	try {
+		json = JSON.parse(fs.readFileSync(dataPath));
+	} catch (e) {}
+}
 
 function filter(text) {
 	const filter = new Filter();
@@ -150,16 +174,20 @@ app.post('/api', (req, res) => {
 			channel.ignoreReport(body.id);
 			res.sendStatus(200);
 			break;
+		case 'checkThreadExists':
+			res.send({ exists: threads.find(thread => thread.id === body.id) });
+			break;
 		default:
 			res.sendStatus(400);
 	}
 });
 
 function generateId() {
-	let id = genRandom(20);
+	let id = genRandom(70);
 	while (ids.includes(id)) {
-		id = genRandom(20);
+		id = genRandom(70);
 	}
+	ids.push(id);
 	return id;
 }
 
@@ -311,4 +339,24 @@ function sanitizeUsername(username) {
 
 app.listen(port, () => {
 	console.log(`Listening on port ${port}`);
+
+	readJSON();
+
+	channel.messageArray = json.channel.messages.messageArray;
+	channel.reports = json.channel.reports;
+	channel.locked = json.channel.lock.locked;
+	channel.lockMessage = json.channel.lock.lockMessage;
+	channel.messageBackup = json.channel.messages.messageBackup;
+	threads = json.threads.map(thread => {
+		let newThread = new Thread(thread.id);
+		newThread.messageArray = thread.messages;
+		return newThread;
+	});
+	ids = json.ids;
+
+	updateJSON();
+
+	setInterval(() => {
+		updateJSON();
+	}, 200);
 });

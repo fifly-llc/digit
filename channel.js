@@ -80,6 +80,20 @@ class Channel {
 	clear() {
 		this.messageArray = [];
 	}
+
+	toJSON() {
+		return {
+			messages: {
+				messageArray: this.messageArray,
+				messageBackup: this.messageBackup,
+			},
+			reports: this.reports,
+			lock: {
+				locked: this.locked,
+				lockMessage: this.lockMessage
+			}
+		}
+	}
 }
 
 module.exports = Channel;

@@ -9,7 +9,7 @@
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/fifly-llc/digit)
 ![GitHub last commit](https://img.shields.io/github/last-commit/fifly-llc/digit)
 
-Digit is an open-source chatting app. It runs on `express.js` (and the preinstalled `fs` library) alone. It has a normal chatting portal, control panel, admin portal, and a manager portal. It supports deleting messages, editing messages, and reporting messages. Some features coming soon are:
+Digit is an open-source chatting app. It has a normal chatting portal, control panel, admin portal, and a manager portal. It supports deleting messages, editing messages, and reporting messages. Some features coming soon are:
 
 * Multiple channels
 * File upload
