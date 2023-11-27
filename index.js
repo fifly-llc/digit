@@ -182,14 +182,6 @@ app.post('/api', (req, res) => {
 	}
 });
 
-app.use((err, req, res, next) => {
-	if (err.status === 502) {
-		return res.status(502).sendFile('502.html', { root: path.join(__dirname, 'public') });
-	}
-	
-	next(err);
-});
-
 function generateId() {
 	let id = genRandom(70);
 	while (ids.includes(id)) {
