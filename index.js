@@ -15,8 +15,6 @@ let ids = [];
 
 let json = {};
 
-let killed = false;
-
 const adminAuth = 'qw12', controlAuth = 'kkk0';
 
 dataPath = process.env.DATA_PATH;
@@ -73,18 +71,6 @@ function addTags(text) {
 	});
 }
 
-function blockPage() {
-	return '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Access Denied</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"crossorigin="anonymous" /><style>body {font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;background-color: #f8f9fa;margin: 0;padding: 0;display: flex;flex-direction: column;align-items: center;justify-content: center;height: 100vh;}.container {text-align: center;}.icon {color: #dc3545;font-size: 5em;}h1 {color: #dc3545;margin-top: 10px;}p {color: #6c757d;margin-top: 10px;}footer {position: fixed;bottom: 0;left: 0;width: 100%;background-color: #343a40;color: #ffffff;padding: 10px;text-align: center;}</style></head><body><div class="container"><div class="icon"><i class="fas fa-times-circle"></i></div><h1>Access Denied</h1><p>You have been blocked from this site.</p></div><footer>Time: <span id="time"></span></footer><script>setInterval(() => {document.getElementById("time").innerHTML = new Date().toLocaleString();fetch("/api",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({type:"checkKilled"})}).then(e=>e.json()).then(e=>{if(e.killed === false){window.location.reload()}});}, 1000);</script></body></html>';
-}
-
-app.use((req, res, next) => {
-	if (req.path !== '/control' && killed) {
-		res.send(blockPage());
-	} else {
-		next();
-	}
-});
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -114,9 +100,6 @@ app.post('/api', (req, res) => {
 		case 'lock':
 			handleLock(body, res);
 			break;
-		case 'kill':
-			handleKill(body, res);
-			break;
 		case 'checkLocked':
 			res.send({ locked: channel.isLocked().locked });
 			break;
@@ -125,9 +108,6 @@ app.post('/api', (req, res) => {
 			break;
 		case 'getBackup':
 			handleGetBackup(body, res);
-			break;
-		case 'checkKilled':
-			res.send({ killed: killed });
 			break;
 		case 'checkAdminAuthCorrect':
 			res.send({ correct: adminAuth === body.auth });
@@ -329,23 +309,6 @@ function handleLock(body, res) {
 	res.sendStatus(200);
 }
 
-function handleKill(body, res) {
-	if (body.auth !== adminAuth && body.auth !== controlAuth) {
-		res.sendStatus(401);
-		return;
-	}
-
-	if (killed) {
-		killed = false;
-		res.sendStatus(200);
-		return;
-	} else {
-		killed = true;
-		res.sendStatus(200);
-		return;
-	}
-}
-
 function handleGetBackup(body, res) {
 	if (body.auth !== controlAuth) {
 		res.sendStatus(401);
@@ -379,11 +342,13 @@ app.listen(port, () => {
 	channel.locked = json.channel.lock.locked;
 	channel.lockMessage = json.channel.lock.lockMessage;
 	channel.messageBackup = json.channel.messages.messageBackup;
+
 	threads = json.threads.map(thread => {
 		let newThread = new Thread(thread.id);
 		newThread.messageArray = thread.messages;
 		return newThread;
 	});
+
 	ids = json.ids;
 
 	updateJSON();

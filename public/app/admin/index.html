@@ -296,22 +296,6 @@
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
-					type: 'checkKilled',
-				}),
-			})
-				.then(res => res.json())
-				.then(data => {
-					if (data.killed) {
-						window.location.reload();
-					}
-				});
-
-			fetch('/api', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
 					type: 'getMessages',
 				}),
 			})
