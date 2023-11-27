@@ -65,7 +65,6 @@
 	<div class="controls">
 		<button id="clear">🧽 Clear All Messages 🧽</button>
 		<button id="lock"></button>
-		<button id="kill"></button>
 		<button id="backup">📦 View Backup 📦</button>
 	</div>
 	<h2 style="display: none;" id="backup-view-header">Backup Viewer:</h2>
@@ -84,10 +83,6 @@
 
 	document.getElementById('lock').addEventListener('click', () => {
 		lock();
-	});
-
-	document.getElementById('kill').addEventListener('click', () => {
-		kill();
 	});
 
 	document.getElementById('backup').addEventListener('click', () => {
@@ -145,23 +140,6 @@
 			},
 			body: JSON.stringify({
 				type: 'lock',
-				auth: auth,
-			}),
-		});
-	}
-
-	function kill() {
-		if (!canControl) {
-			return;
-		}
-
-		fetch('/api', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({
-				type: 'kill',
 				auth: auth,
 			}),
 		});
