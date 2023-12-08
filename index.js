@@ -4,7 +4,6 @@ const Filter = require('./filter');
 const Channel = require('./channel');
 const Thread = require('./thread');
 const { genRandom, stripHTML, stripEmojis } = require('./utils');
-require('dotenv').config();
 
 const app = express();
 const port = 3000;
@@ -17,7 +16,7 @@ let json = {};
 
 const adminAuth = 'qw12', controlAuth = 'kkk0';
 
-dataPath = process.env.DATA_PATH;
+dataPath = 'data.json';
 
 console.log('[NOTICE] Admin Authentication is <' + adminAuth + '>.');
 console.log('[NOTICE] Control Authentication is <' + controlAuth + '>.');
