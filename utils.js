@@ -9,7 +9,7 @@ module.exports = {
         return result;
     },
     stripHTML: (str) => {
-        return str.replace(/(<([^>]+)>)/gi, '');
+        return str.replace(/<[^>]*>/g, '');
     },
     stripEmojis: (str) => {
         return str.replace(/([\uD800-\uDBFF][\uDC00-\uDFFF])/g, '');
