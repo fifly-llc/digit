@@ -36,10 +36,7 @@ function updateJSON() {
 function initJSON() {
 	json = {
 		channel: {
-			messages: {
-				messageArray: [],
-				messageBackup: [],
-			},
+			messages: [],
 			reports: [],
 			lock: {
 				locked: false,
@@ -56,7 +53,9 @@ function initJSON() {
 function readJSON() {
 	try {
 		json = JSON.parse(fs.readFileSync(dataPath));
-	} catch (e) {}
+	} catch (e) {
+		console.error('Error parsing JSON:', e.message);
+	}
 }
 
 function filter(text) {
@@ -104,9 +103,6 @@ app.post('/api', (req, res) => {
 			break;
 		case 'getMessage':
 			res.send({ message: channel.isLocked().message });
-			break;
-		case 'getBackup':
-			handleGetBackup(body, res);
 			break;
 		case 'checkAdminAuthCorrect':
 			res.send({ correct: adminAuth === body.auth });
@@ -300,15 +296,6 @@ function handleLock(body, res) {
 	res.sendStatus(200);
 }
 
-function handleGetBackup(body, res) {
-	if (body.auth !== controlAuth) {
-		res.sendStatus(401);
-		return;
-	}
-
-	res.send({ messages: channel.getBackup() });
-}
-
 function sanitizeUsername(username) {
 	const prefixes = ['[ADMIN]', '[BOT]', '[SYSTEM]'];
 	for (const prefix of prefixes) {
@@ -322,17 +309,16 @@ function sanitizeUsername(username) {
 app.listen(port, () => {
 	console.log(`Listening on port ${port}`);
 
-	if(!fs.existsSync(dataPath)) {
+	if(!fs.existsSync(dataPath) || fs.readFileSync(dataPath).length === 0) {
 		initJSON();
 	}
 
 	readJSON();
 
-	channel.messageArray = json.channel.messages.messageArray;
+	channel.messageArray = json.channel.messages;
 	channel.reports = json.channel.reports;
 	channel.locked = json.channel.lock.locked;
 	channel.lockMessage = json.channel.lock.lockMessage;
-	channel.messageBackup = json.channel.messages.messageBackup;
 
 	threads = json.threads.map(thread => {
 		let newThread = new Thread(thread.id);
