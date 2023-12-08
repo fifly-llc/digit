@@ -1,7 +1,6 @@
 class Channel {
 	constructor() {
 		this.messageArray = [];
-		this.messageBackup = [];
 		this.reports = [];
 
 		this.locked = false;
@@ -24,13 +23,8 @@ class Channel {
 		return this.messageArray;
 	}
 
-	getBackup() {
-		return this.messageBackup;
-	}
-
 	postMessage(message) {
 		this.messageArray.push(message);
-		this.messageBackup.push(message);
 	}
 
 	postReport(id, reason) {
@@ -83,10 +77,7 @@ class Channel {
 
 	toJSON() {
 		return {
-			messages: {
-				messageArray: this.messageArray,
-				messageBackup: this.messageBackup,
-			},
+			messages: this.messageArray,
 			reports: this.reports,
 			lock: {
 				locked: this.locked,
