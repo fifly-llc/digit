@@ -14,12 +14,11 @@ let ids = [];
 
 let json = {};
 
-const adminAuth = 'qw12', controlAuth = 'kkk0';
+const adminAuth = 'qw12';
 
 dataPath = 'data.json';
 
 console.log('[NOTICE] Admin Authentication is <' + adminAuth + '>.');
-console.log('[NOTICE] Control Authentication is <' + controlAuth + '>.');
 
 function updateJSON() {
 	json = {
@@ -106,9 +105,6 @@ app.post('/api', (req, res) => {
 			break;
 		case 'checkAdminAuthCorrect':
 			res.send({ correct: adminAuth === body.auth });
-			break;
-		case 'checkControlAuthCorrect':
-			res.send({ correct: controlAuth === body.auth });
 			break;
 		case 'deleteMessage':
 			if (body.auth !== adminAuth) {
@@ -276,7 +272,7 @@ function handleAdminMessage(body, req, res) {
 }
 
 function handleClear(body, res) {
-	if (body.auth !== adminAuth && body.auth !== controlAuth) {
+	if (body.auth !== adminAuth) {
 		res.sendStatus(401);
 		return;
 	}
@@ -286,7 +282,7 @@ function handleClear(body, res) {
 }
 
 function handleLock(body, res) {
-	if (body.auth !== adminAuth && body.auth !== controlAuth) {
+	if (body.auth !== adminAuth) {
 		res.sendStatus(401);
 		return;
 	}
