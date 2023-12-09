@@ -38,7 +38,6 @@
 	<p>You've landed on Planet Digit, the modern chatting app for the 21st century.</p>
 	<button id="chat-button">Chat App</button>
 	<button id="admin-button">Chat App (Admin)</button>
-	<button id="control-panel-button">Control Panel</button>
 	<button id="create-thread">Create Thread</button>
 	<button id="join-thread">Join Thread</button>
 </body>
@@ -46,7 +45,6 @@
 <script>
 	let chatButton = document.getElementById("chat-button");
 	let adminButton = document.getElementById("admin-button");
-	let controlPanelButton = document.getElementById("control-panel-button");
 	let createThreadButton = document.getElementById("create-thread");
 	let joinThreadButton = document.getElementById("join-thread");
 
@@ -56,10 +54,6 @@
 
 	adminButton.addEventListener("click", () => {
 		window.location.href = "/app/admin/";
-	});
-
-	controlPanelButton.addEventListener("click", () => {
-		window.location.href = "/control/";
 	});
 
 	createThreadButton.addEventListener("click", () => {
