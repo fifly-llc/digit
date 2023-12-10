@@ -11,10 +11,10 @@
 
 Digit is an open-source chatting app. It has a normal chatting portal, control panel, admin portal, and a manager portal. It supports deleting messages, editing messages, and reporting messages. Some features coming soon are:
 
-* Multiple channels
 * File upload
 * Markdown support
 * Voice & video chat
+* Accounts
 
 ## Building/Running
 
