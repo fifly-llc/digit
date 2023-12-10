@@ -1,6 +1,6 @@
 {
 	"name": "digit",
-	"version": "1.7.2",
+	"version": "1.7.21",
 	"description": "A modern chatting app.",
 	"main": "index.js",
 	"scripts": {

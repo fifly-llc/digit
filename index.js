@@ -4,19 +4,16 @@ const Filter = require('./filter');
 const Channel = require('./channel');
 const Thread = require('./thread');
 const { genRandom, stripHTML, stripEmojis } = require('./utils');
+const config = require('./config');
 
 const app = express();
-const port = 3000;
+const port = config.port;
 
+// Initialize Channel, Threads, and IDs
 let channel = new Channel();
 let threads = [];
 let ids = [];
-
 let json = {};
-
-const adminAuth = 'qw12';
-
-dataPath = 'data.json';
 
 console.log('[NOTICE] Admin Authentication is <' + adminAuth + '>.');
 
@@ -29,7 +26,7 @@ function updateJSON() {
 		ids: ids,
 	};
 
-	fs.writeFileSync(dataPath, JSON.stringify(json, null, 4));
+	fs.writeFileSync(config.dataPath, JSON.stringify(json, null, 4));
 }
 
 function initJSON() {
@@ -46,12 +43,12 @@ function initJSON() {
 		ids: [],
 	};
 
-	fs.writeFileSync(dataPath, JSON.stringify(json, null, 4));
+	fs.writeFileSync(config.dataPath, JSON.stringify(json, null, 4));
 }
 
 function readJSON() {
 	try {
-		json = JSON.parse(fs.readFileSync(dataPath));
+		json = JSON.parse(fs.readFileSync(config.dataPath));
 	} catch (e) {
 		console.error('Error parsing JSON:', e.message);
 	}
@@ -302,10 +299,10 @@ function sanitizeUsername(username) {
 	return stripEmojis(username);
 }
 
-app.listen(port, () => {
-	console.log(`Listening on port ${port}`);
+app.listen(config.port, () => {
+	console.log(`Listening on port ${config.port}`);
 
-	if(!fs.existsSync(dataPath) || fs.readFileSync(dataPath).length === 0) {
+	if (!fs.existsSync(config.dataPath) || fs.readFileSync(config.dataPath).length === 0) {
 		initJSON();
 	}
 
