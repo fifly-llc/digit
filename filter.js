@@ -15,7 +15,8 @@ class Filter {
 	isProfane(string) {
 		return this.list
 			.filter((word) => {
-				const wordExp = new RegExp(`\\b${word.replace(/(\W)/g, '\\$1')}\\b`, 'gi');
+				const wordExpPattern = '\\b' + word.replace(/(\W)/g, '\\$1') + '\\b';
+				const wordExp = new RegExp(wordExpPattern, 'gi');
 				return !this.exclude.includes(word.toLowerCase()) && wordExp.test(string);
 			})
 			.length > 0 || false;
