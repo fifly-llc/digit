@@ -7,7 +7,6 @@ const { genRandom, stripHTML, stripEmojis } = require('./utils');
 const config = require('./config');
 
 const app = express();
-const port = config.port;
 
 // Initialize Channel, Threads, and IDs
 let channel = new Channel();
@@ -15,7 +14,7 @@ let threads = [];
 let ids = [];
 let json = {};
 
-console.log('[NOTICE] Admin Authentication is <' + adminAuth + '>.');
+console.log('[NOTICE] Admin Authentication is <' + config.adminAuth + '>.');
 
 function updateJSON() {
 	json = {
@@ -101,10 +100,10 @@ app.post('/api', (req, res) => {
 			res.send({ message: channel.isLocked().message });
 			break;
 		case 'checkAdminAuthCorrect':
-			res.send({ correct: adminAuth === body.auth });
+			res.send({ correct: config.adminAuth === body.auth });
 			break;
 		case 'deleteMessage':
-			if (body.auth !== adminAuth) {
+			if (body.auth !== config.adminAuth) {
 				res.sendStatus(401);
 				return;
 			}
@@ -113,7 +112,7 @@ app.post('/api', (req, res) => {
 			res.sendStatus(200);
 			break;
 		case 'editMessage':
-			if (body.auth !== adminAuth) {
+			if (body.auth !== config.adminAuth) {
 				res.sendStatus(401);
 				return;
 			}
@@ -129,7 +128,7 @@ app.post('/api', (req, res) => {
 			res.sendStatus(200);
 			break;
 		case 'getReports':
-			if (body.auth !== adminAuth) {
+			if (body.auth !== config.adminAuth) {
 				res.sendStatus(401);
 				return;
 			}
@@ -137,14 +136,11 @@ app.post('/api', (req, res) => {
 			res.send({ reports: channel.getReports() });
 			break;
 		case 'getThreadMessages':
-			let thread = threads.find(thread => thread.id === body.id);
-
-			if (thread) {
-				res.send({ messages: thread.getMessages() });
+			if (threads.find(thread => thread.id === body.id)) {
+				res.send({ messages: threads.find(thread => thread.id === body.id).getMessages() });
 			} else {
 				res.sendStatus(400);
 			}
-
 			break;
 		case 'postThreadMessage':
 			handleThreadMessage(body, req, res);
@@ -154,7 +150,7 @@ app.post('/api', (req, res) => {
 			res.sendStatus(200);
 			break;
 		case 'ignoreReport':
-			if (body.auth !== adminAuth) {
+			if (body.auth !== config.adminAuth) {
 				res.sendStatus(401);
 				return;
 			}
@@ -269,7 +265,7 @@ function handleAdminMessage(body, req, res) {
 }
 
 function handleClear(body, res) {
-	if (body.auth !== adminAuth) {
+	if (body.auth !== config.adminAuth) {
 		res.sendStatus(401);
 		return;
 	}
@@ -279,7 +275,7 @@ function handleClear(body, res) {
 }
 
 function handleLock(body, res) {
-	if (body.auth !== adminAuth) {
+	if (body.auth !== config.adminAuth) {
 		res.sendStatus(401);
 		return;
 	}
