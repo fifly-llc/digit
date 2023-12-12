@@ -12,12 +12,12 @@ const app = express();
 let channel = new Channel();
 let threads = [];
 let ids = [];
-let json = {};
+let data = {};
 
 console.log('[NOTICE] Admin Authentication is <' + config.adminAuth + '>.');
 
 function updateJSON() {
-	json = {
+	data = {
 		channel: channel.toJSON(),
 		threads: threads.map((thread) => {
 			return thread.toJSON();
@@ -25,11 +25,11 @@ function updateJSON() {
 		ids: ids,
 	};
 
-	fs.writeFileSync(config.dataPath, JSON.stringify(json, null, 4));
+	fs.writeFileSync(config.dataPath, JSON.stringify(data, null, 4));
 }
 
 function initJSON() {
-	json = {
+	data = {
 		channel: {
 			messages: [],
 			reports: [],
@@ -42,15 +42,19 @@ function initJSON() {
 		ids: [],
 	};
 
-	fs.writeFileSync(config.dataPath, JSON.stringify(json, null, 4));
+	fs.writeFileSync(config.dataPath, JSON.stringify(data, null, 4));
 }
 
 function readJSON() {
 	try {
-		json = JSON.parse(fs.readFileSync(config.dataPath));
+		data = JSON.parse(fs.readFileSync(config.dataPath));
 	} catch (e) {
 		console.error('Error parsing JSON:', e.message);
 	}
+}
+
+function formatContent(content) {
+	return filter(addTags(stripHTML(content)));
 }
 
 function filter(text) {
@@ -181,12 +185,12 @@ function handlePostMessage(body, req, res) {
 		return;
 	}
 
-	let sanitizedUsername = sanitizeUsername(body.message.username);
+	let username = filter(formatUsername(body.message.username));
 
 	channel.postMessage({
-		username: filter(sanitizedUsername),
+		username,
 		timestamp: filter(body.message.timestamp),
-		content: filter(body.message.content),
+		content: formatContent(body.message.content),
 		id: generateId(),
 		badges: []
 	});
@@ -195,12 +199,12 @@ function handlePostMessage(body, req, res) {
 }
 
 function handleThreadMessage(body, req, res) {
-	let sanitizedUsername = sanitizeUsername(body.message.username);
+	let username = filter(formatUsername(body.message.username));
 
 	threads.find(thread => thread.id === body.id).postMessage({
-		username: filter(sanitizedUsername),
+		username,
 		timestamp: filter(body.message.timestamp),
-		content: filter(body.message.content),
+		content: formatContent(body.message.content),
 		id: generateId()
 	});
 
@@ -213,11 +217,11 @@ function handleBotMessage(body, res) {
 		return;
 	}
 
-	let sanitizedUsername = '[BOT] ' + sanitizeUsername(body.message.username);
+	let username = filter(formatUsername(body.message.username));
 
 	channel.postMessage({
-		content: body.message.content,
-		username: sanitizedUsername,
+		content: formatContent(body.message.content),
+		username,
 		timestamp: 'BOT MESSAGE',
 		id: generateId(),
 		badges: [
@@ -229,11 +233,11 @@ function handleBotMessage(body, res) {
 }
 
 function handleSystemMessage(body, res) {
-	let sanitizedUsername = '[SYSTEM] ' + sanitizeUsername(body.message.username);
+	let username = filter(formatUsername(body.message.username));
 
 	channel.postMessage({
-		content: body.message.content,
-		username: sanitizedUsername,
+		content: formatContent(body.message.content),
+		username,
 		timestamp: 'SYSTEM MESSAGE',
 		id: generateId(),
 		badges: [
@@ -247,11 +251,11 @@ function handleSystemMessage(body, res) {
 }
 
 function handleAdminMessage(body, req, res) {
-	let sanitizedUsername = sanitizeUsername(body.message.username);
+	let username = filter(formatUsername(body.message.username));
 
 	channel.postMessage({
-		content: filter(body.message.content),
-		username: filter(sanitizedUsername),
+		content: formatContent(body.message.content),
+		username,
 		timestamp: body.message.timestamp,
 		id: generateId(),
 		badges: [
@@ -285,7 +289,7 @@ function handleLock(body, res) {
 	res.sendStatus(200);
 }
 
-function sanitizeUsername(username) {
+function formatUsername(username) {
 	const prefixes = ['[ADMIN]', '[BOT]', '[SYSTEM]'];
 	for (const prefix of prefixes) {
 		if (username.startsWith(prefix)) {
@@ -304,18 +308,18 @@ app.listen(config.port, () => {
 
 	readJSON();
 
-	channel.messageArray = json.channel.messages;
-	channel.reports = json.channel.reports;
-	channel.locked = json.channel.lock.locked;
-	channel.lockMessage = json.channel.lock.lockMessage;
+	channel.messageArray = data.channel.messages;
+	channel.reports = data.channel.reports;
+	channel.locked = data.channel.lock.locked;
+	channel.lockMessage = data.channel.lock.lockMessage;
 
-	threads = json.threads.map(thread => {
+	threads = data.threads.map(thread => {
 		let newThread = new Thread(thread.id);
 		newThread.messageArray = thread.messages;
 		return newThread;
 	});
 
-	ids = json.ids;
+	ids = data.ids;
 
 	updateJSON();
 

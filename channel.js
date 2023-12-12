@@ -1,3 +1,5 @@
+const { genRandom } = require("./utils");
+
 class Channel {
 	constructor() {
 		this.messageArray = [];
@@ -27,9 +29,10 @@ class Channel {
 		this.messageArray.push(message);
 	}
 
-	postReport(id, reason) {
+	postReport(id, reason, ids) {
 		this.reports.push({
 			id: id,
+			uid: genRandom(70, ids),
 			reason: reason,
 			message: this.getMessageFromId(id),
 		});
@@ -58,8 +61,8 @@ class Channel {
 		this.reports = this.reports.filter((report) => report.id !== id);
 	}
 
-	ignoreReport(id) {
-		this.reports = this.reports.filter((report) => report.id !== id);
+	ignoreReport(uid) {
+		this.reports = this.reports.filter((report) => report.uid !== uid);
 	}
 
 	lock() {

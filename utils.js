@@ -4,7 +4,17 @@ const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567
 const charactersLength = characters.length;
 
 module.exports = {
-    genRandom: (length) => {
+    genRandom: (length, garbageResults) => {
+        if (garbageResults) {
+            let result;
+            while (garbageResults.includes(result)) {
+                result = '';
+                for (let i = 0; i < length; i++) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+                }
+            }
+            return result;
+        }
         let result = '';
         for (let i = 0; i < length; i++) {
             result += characters.charAt(Math.floor(Math.random() * charactersLength));
