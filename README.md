@@ -1,4 +1,4 @@
-# [![Digit Logo](/content/logo-transparent.png)](https://digit.fifly.org)
+# [![Digit Logo](/content/logo-text-white.png)](https://digit.fifly.org)
 
 ![Number of GitHub contributors](https://img.shields.io/github/contributors/fifly-llc/digit)
 [![Number of GitHub issues that are open](https://img.shields.io/github/issues/fifly-llc/digit)](https://github.com/fifly-llc/digit/issues)

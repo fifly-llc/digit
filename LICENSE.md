@@ -1,45 +1,21 @@
-# FiFly Redistributable Software License
+# Digital Open Technologies License (DOTL) Version 1.0
 
-Version 1.0
+Copyright (c) 2023 proplayer919 (github), fifly-llc (github), fifly.org, proplayer919.dev
 
-## Preamble
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-This license is a modified version of the MIT License and the BSD 3-Clause License, tailored to the specific needs of FiFly Pty Ltd. This license governs the use, distribution, and modification of the software and source code associated with FiFly products.
+1. The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-## License Terms
+2. Redistributions of the Software must retain the above copyright notice, this list of conditions, and the following disclaimer.
 
-1. Grant of License:
+3. Redistributions in any form, including modified or unmodified versions of the Software, must be accompanied by a prominent notice stating that the Software has been modified.
 
-    Subject to the terms and conditions of this license, FiFly Pty Ltd ("Licensor") grants you ("Licensee") a worldwide, non-exclusive, royalty-free license to use, reproduce, modify, and distribute the software and source code, provided that the following conditions are met:
+4. The Software may not be resold or sold for commercial purposes.
 
-2. No Liability:
+5. The copyright holder reserves the right to terminate this license at any time, for any reason, by providing notice to the licensee. Upon termination, all rights granted under this license shall immediately cease, and the licensee must cease all use, distribution, and possession of the Software.
 
-    Neither the contributors nor the copyright holders of the software shall be liable for any damages, including but not limited to, direct, indirect, special, incidental, or consequential damages, arising from the use, distribution, or modification of the software. The software is provided "as is," and the Licensee uses it at their own risk.
+6. This license automatically terminates if the licensee fails to comply with any of the conditions stated herein. Upon termination, the licensee must immediately cease all use, distribution, and possession of the Software.
 
-3. No Resale or Unauthorized Reproduction:
+7. The licensee is expressly prohibited from using the image, likeness, or representation of the copyright holder(s) in any reproductions, adaptations, or derivative works of the Software without the explicit written consent of the copyright holder(s).
 
-    Licensee shall not (re)sell the software or reproduce it without making substantial changes to the code. This license explicitly prohibits any commercial distribution of the software without written permission from FiFly Pty Ltd.
-
-4. No Modification of License:
-
-    Licensee shall not modify the terms of this license when reproducing, distributing, or sublicensing the software. Any modifications to the license terms require explicit written consent from FiFly Pty Ltd.
-
-5. Compliance with Laws:
-
-    Licensee shall use the software in compliance with all applicable laws and regulations. This license does not grant permission for any illegal or unethical use of the software.
-
-6. Attribution:
-
-    Licensee may use the names of the original developers or contributors for the purpose of giving appropriate credit. However, using their names for endorsement, promotion, or advertising requires written permission from the respective individuals or entities.
-
-7. Termination:
-
-    This license is effective until terminated. FiFly Pty Ltd reserves the right to terminate the license if Licensee breaches any of its terms. Upon termination, all rights granted to Licensee under this license will cease.
-
-8. Governing Law:
-
-    This license shall be governed by and construed in accordance with the laws of Australia. Any disputes arising under or in connection with this license shall be subject to the exclusive jurisdiction of the Australian courts.
-
-## Disclaimer
-
-This license is provided for informational purposes and should not be considered legal advice. FiFly Pty Ltd recommends consulting with legal counsel to ensure compliance with all applicable laws and regulations.
+THE SOFTWARE IS PROVIDED "AS IS," WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
