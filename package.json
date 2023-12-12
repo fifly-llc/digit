@@ -4,7 +4,8 @@
 	"description": "A modern chatting app.",
 	"main": "index.js",
 	"scripts": {
-		"start": "node ."
+		"start": "node .",
+		"clear": "node clear.js"
 	},
 	"repository": {
 		"type": "git",
